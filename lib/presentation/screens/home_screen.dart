@@ -8,7 +8,10 @@ import 'detail_screen.dart';
 import 'settings_screen.dart';
 import 'toc_screen.dart';
 import 'pdf_viewer_screen.dart';
+import 'quiz_screen.dart';
+import 'notes_screen.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/share_card_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -220,6 +223,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     Set<int> favoriteIds,
   ) {
     final bookSelection = ref.watch(bookSelectionProvider);
+    final lastReadId = ref.watch(lastReadProvider);
+    final hadithOfTheDayState = ref.watch(hadithOfTheDayProvider);
     final isSearching = _searchController.text.trim().isNotEmpty;
 
     return Column(
@@ -266,6 +271,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
 
+        // Quick Access Feature Chips (When not searching)
+        if (!isSearching)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionChip(
+                    icon: Icons.quiz_rounded,
+                    label: 'اختبر حفظك',
+                    color: const Color(0xFF00897B),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const QuizScreen()),
+                      );
+                    },
+                    theme: theme,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickActionChip(
+                    icon: Icons.edit_note_rounded,
+                    label: 'ملاحظاتي',
+                    color: theme.colorScheme.secondary,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NotesScreen()),
+                      );
+                    },
+                    theme: theme,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         // Expanded List View
         Expanded(
           child: asyncList.when(
@@ -295,22 +339,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 );
               }
 
-              // Featured daily hadith index based on day of year
-              final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays;
-              final dailyHadithIndex = (dayOfYear % hadiths.length);
-              final dailyHadith = hadiths[dailyHadithIndex];
+              // Selected or Daily Hadith
+              HadithModel dailyHadith;
+              if (hadithOfTheDayState.selectedHadithId != null) {
+                dailyHadith = hadiths.firstWhere(
+                  (h) => h.id == hadithOfTheDayState.selectedHadithId,
+                  orElse: () => hadiths.first,
+                );
+              } else {
+                final dayOfYear = DateTime.now()
+                    .difference(DateTime(DateTime.now().year, 1, 1))
+                    .inDays;
+                final dailyHadithIndex = (dayOfYear % hadiths.length);
+                dailyHadith = hadiths[dailyHadithIndex];
+              }
+
+              // Last read hadith model
+              HadithModel? lastReadHadith;
+              if (lastReadId != null) {
+                try {
+                  lastReadHadith = hadiths.firstWhere((h) => h.id == lastReadId);
+                } catch (_) {}
+              }
+
+              final headerCount = !isSearching ? (lastReadHadith != null ? 2 : 1) : 0;
 
               return ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: filteredByBook.length + (!isSearching ? 1 : 0),
+                itemCount: filteredByBook.length + headerCount,
                 itemBuilder: (context, index) {
-                  // If not searching, index 0 is the Daily Hadith spotlight
-                  if (!isSearching && index == 0) {
-                    return _buildDailyHadithSpotlight(dailyHadith, theme);
+                  if (!isSearching) {
+                    if (lastReadHadith != null && index == 0) {
+                      return _buildContinueReadingCard(lastReadHadith, theme);
+                    }
+                    if ((lastReadHadith != null && index == 1) ||
+                        (lastReadHadith == null && index == 0)) {
+                      return _buildDailyHadithSpotlight(
+                        dailyHadith,
+                        hadithOfTheDayState.isRandomized,
+                        hadiths,
+                        theme,
+                      );
+                    }
                   }
 
-                  final actualIndex = !isSearching ? index - 1 : index;
+                  final actualIndex = index - headerCount;
                   final hadith = filteredByBook[actualIndex];
                   final isFav = favoriteIds.contains(hadith.id);
                   return _buildHadithCard(hadith, isFav, theme);
@@ -326,7 +400,152 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildDailyHadithSpotlight(HadithModel hadith, ThemeData theme) {
+  Widget _buildQuickActionChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    final isDark = theme.brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.tajawal(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContinueReadingCard(HadithModel hadith, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12, top: 4),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B2F25) : const Color(0xFFE8F5EE),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DetailScreen(hadithId: hadith.id),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DetailScreen(hadithId: hadith.id),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'متابعة ←',
+                    style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'متابعة القراءة من حيث توقفت',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(Icons.history_rounded,
+                              color: theme.colorScheme.primary, size: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'الحديث ${hadith.id}: ${hadith.title}',
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyHadithSpotlight(
+    HadithModel hadith,
+    bool isRandomized,
+    List<HadithModel> allHadiths,
+    ThemeData theme,
+  ) {
     final isDark = theme.brightness == Brightness.dark;
     final gold = theme.colorScheme.secondary;
 
@@ -370,19 +589,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.share_rounded,
-                          color: Colors.white70, size: 20),
-                      tooltip: 'مشاركة حديث اليوم',
-                      onPressed: () {
-                        Share.share(
-                          '🌟 حديث اليوم من تحفة الولدان:\n\n'
-                          '${hadith.title}\n\n'
-                          '${hadith.narrator}\n\n'
-                          '${hadith.text}\n\n'
-                          'المصدر: ${hadith.source}',
-                        );
-                      },
+                    Row(
+                      children: [
+                        // Shuffle / Randomizer action
+                        IconButton(
+                          icon: const Icon(Icons.shuffle_rounded,
+                              color: Colors.white70, size: 20),
+                          tooltip: 'حديث عشوائي',
+                          onPressed: () {
+                            ref
+                                .read(hadithOfTheDayProvider.notifier)
+                                .shuffle(allHadiths);
+                          },
+                        ),
+                        // Share Card Action
+                        IconButton(
+                          icon: const Icon(Icons.image_outlined,
+                              color: Colors.white70, size: 20),
+                          tooltip: 'مشاركة كبطاقة صورة',
+                          onPressed: () {
+                            ShareCardDialog.show(context, hadith);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share_rounded,
+                              color: Colors.white70, size: 20),
+                          tooltip: 'مشاركة نصياً',
+                          onPressed: () {
+                            Share.share(
+                              '🌟 حديث من تحفة الولدان:\n\n'
+                              '${hadith.title}\n\n'
+                              '${hadith.narrator}\n\n'
+                              '${hadith.text}\n\n'
+                              'المصدر: ${hadith.source}',
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -397,7 +640,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'حديث اليوم',
+                            isRandomized ? 'حديث مختار عشوائياً' : 'حديث اليوم',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -405,8 +648,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Icon(Icons.auto_awesome_rounded,
-                              color: gold, size: 14),
+                          Icon(
+                            isRandomized
+                                ? Icons.auto_awesome_rounded
+                                : Icons.calendar_today_rounded,
+                            color: gold,
+                            size: 13,
+                          ),
                         ],
                       ),
                     ),
@@ -548,6 +796,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final isLight = theme.brightness == Brightness.light;
     final isPart1 = hadith.id <= 40;
     final tagColor = isPart1 ? theme.colorScheme.primary : theme.colorScheme.secondary;
+    final notesMap = ref.watch(hadithNotesProvider);
+    final hasNote = notesMap.containsKey(hadith.id);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -591,7 +841,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Action controls (Bookmark & Share)
+                    // Action controls (Bookmark & Note icon)
                     Row(
                       children: [
                         IconButton(
@@ -608,6 +858,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 .toggleFavorite(hadith.id);
                           },
                         ),
+                        if (hasNote)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Icon(
+                              Icons.edit_note_rounded,
+                              color: theme.colorScheme.secondary,
+                              size: 20,
+                            ),
+                          ),
                       ],
                     ),
                     // Hadith Title and ID Badge
@@ -865,7 +1124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           title: 'أهم المراجع والمصادر (Bibliography)',
           subtitle: 'المصادر والكتب المعتمدة في تحقيق الأحاديث وشرحها',
           content:
-              '• القرآن الكريم\n• صحيح البخاري — الإمام البخاري\n• صحيح مسلم — الإمام مسلم\n• سنن أبي داود — الإمام أبو داود\n• سنن الترمذي — الإمام الترمذي\n• سنن النسائي — الإمام النسائي\n• سنن ابن ماجه — الإمام ابن ماجه\n• رياض الصالحين — الإمام النووي\n• شرح رياض الصالحين — الشيخ ابن العثيمين\n• دليل الفالحين لطرق رياض الصالحين — الشيخ محمد بن علان الصديقي الشافعي\n• فيض القدير شرح الجامع الصغير — الحافظ المناوي\n• تفسير القرآن العظيم — الحافظ ابن كثير\n• تيسير الكريم الرحمن في تفسير كلام المنان — الشيخ السعدي\n• الوافي في شرح الشاطبية — الشيخ عبد الغني عبد الفتاح القاضي\n• شرح القواعد الحسان في تفسير القرآن — الشيخ ابن العثيمين\n• الإبانة عن معاني القراءات — الإمام المكي بن أبي طالب\n• الفرائد الجليلة في شرح الدرر اللوامع — العلامة عبدالله بن فودي\n• الفصول في سيرة الرسول — الحافظ ابن كثير\n• التبيان في آداب حملة القرآن — الإمام النووي\n• موطأ مالك — الإمام مالك\n• الواضح في علوم القرآن — الشيخ أبو رفيدة السلفي',
+              '• القرآن الكريم\n• صحيح البخاري — الإمام البخاري\n• صحيح مسلم — الإمام مسلم\n• سنن أبي داود — الإمام أبو داود\n• سنن الترمذي — الإمام الترمذي\n• سنن النسائي — الإمام النسائي\n• سنن ابن ماجه — الإمام ابن ماجه\n• رياض الصالحين — الإمام النووي\n• شرح رياض الصالحين — الشيخ ابن العثيمين\n• دليل الفالفين لطرق رياض الصالحين — الشيخ محمد بن علان الصديقي الشافعي\n• فيض القدير شرح الجامع الصغير — الحافظ المناوي\n• تفسير القرآن العظيم — الحافظ ابن كثير\n• تيسير الكريم الرحمن في تفسير كلام المنان — الشيخ السعدي\n• الوافي في شرح الشاطبية — الشيخ عبد الغني عبد الفتاح القاضي\n• شرح القواعد الحسان في تفسير القرآن — الشيخ ابن العثيمين\n• الإبانة عن معاني القراءات — الإمام المكي بن أبي طالب\n• الفرائد الجليلة في شرح الدرر اللوامع — العلامة عبدالله بن فودي\n• الفصول في سيرة الرسول — الحافظ ابن كثير\n• التبيان في آداب حملة القرآن — الإمام النووي\n• موطأ مالك — الإمام مالك\n• الواضح في علوم القرآن — الشيخ أبو رفيدة السلفي',
           theme: theme,
           bodyStyle: bodyStyle,
           titleStyle: titleStyle,

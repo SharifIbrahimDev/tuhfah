@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../models/hadith_model.dart';
 
 // 1. SharedPreferences Provider (to be overridden in main.dart)
@@ -180,4 +181,307 @@ final notificationsEnabledProvider =
     StateNotifierProvider<NotificationsNotifier, bool>((ref) {
   final prefs = ref.watch(sharedPrefsProvider);
   return NotificationsNotifier(prefs);
+});
+
+// 11. Last Read Hadith Provider
+class LastReadNotifier extends StateNotifier<int?> {
+  final SharedPreferences _prefs;
+  static const _key = 'last_read_hadith_id';
+
+  LastReadNotifier(this._prefs) : super(null) {
+    final saved = _prefs.getInt(_key);
+    if (saved != null) {
+      state = saved;
+    }
+  }
+
+  Future<void> setLastRead(int id) async {
+    if (state == id) return;
+    state = id;
+    await _prefs.setInt(_key, id);
+  }
+
+  Future<void> clearLastRead() async {
+    state = null;
+    await _prefs.remove(_key);
+  }
+}
+
+final lastReadProvider = StateNotifierProvider<LastReadNotifier, int?>((ref) {
+  final prefs = ref.watch(sharedPrefsProvider);
+  return LastReadNotifier(prefs);
+});
+
+// 12. Personal Hadith Notes Provider
+class HadithNote {
+  final int hadithId;
+  final String note;
+  final DateTime updatedAt;
+
+  HadithNote({
+    required this.hadithId,
+    required this.note,
+    required this.updatedAt,
+  });
+
+  factory HadithNote.fromJson(Map<String, dynamic> json) {
+    return HadithNote(
+      hadithId: (json['hadithId'] as num?)?.toInt() ?? 0,
+      note: json['note'] as String? ?? '',
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'hadithId': hadithId,
+        'note': note,
+        'updatedAt': updatedAt.toIso8601String(),
+      };
+}
+
+class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
+  final SharedPreferences _prefs;
+  static const _key = 'user_hadith_notes_v1';
+
+  HadithNotesNotifier(this._prefs) : super({}) {
+    _loadNotes();
+  }
+
+  void _loadNotes() {
+    final raw = _prefs.getString(_key);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final Map<String, dynamic> decoded = json.decode(raw);
+        final result = <int, HadithNote>{};
+        decoded.forEach((key, value) {
+          final id = int.tryParse(key);
+          if (id != null && value is Map<String, dynamic>) {
+            result[id] = HadithNote.fromJson(value);
+          }
+        });
+        state = result;
+      } catch (_) {}
+    }
+  }
+
+  Future<void> saveNote(int hadithId, String noteText) async {
+    final trimmed = noteText.trim();
+    final updated = Map<int, HadithNote>.from(state);
+    if (trimmed.isEmpty) {
+      updated.remove(hadithId);
+    } else {
+      updated[hadithId] = HadithNote(
+        hadithId: hadithId,
+        note: trimmed,
+        updatedAt: DateTime.now(),
+      );
+    }
+    state = updated;
+    await _persist();
+  }
+
+  Future<void> deleteNote(int hadithId) async {
+    if (!state.containsKey(hadithId)) return;
+    final updated = Map<int, HadithNote>.from(state);
+    updated.remove(hadithId);
+    state = updated;
+    await _persist();
+  }
+
+  Future<void> _persist() async {
+    final mapToSave = <String, dynamic>{};
+    state.forEach((key, value) {
+      mapToSave[key.toString()] = value.toJson();
+    });
+    await _prefs.setString(_key, json.encode(mapToSave));
+  }
+}
+
+final hadithNotesProvider =
+    StateNotifierProvider<HadithNotesNotifier, Map<int, HadithNote>>((ref) {
+  final prefs = ref.watch(sharedPrefsProvider);
+  return HadithNotesNotifier(prefs);
+});
+
+// 13. Hadith of the Day & Randomizer Provider
+class HadithOfTheDayState {
+  final int? selectedHadithId;
+  final bool isRandomized;
+
+  const HadithOfTheDayState({
+    this.selectedHadithId,
+    this.isRandomized = false,
+  });
+}
+
+class HadithOfTheDayNotifier extends StateNotifier<HadithOfTheDayState> {
+  HadithOfTheDayNotifier() : super(const HadithOfTheDayState());
+
+  void shuffle(List<HadithModel> allHadiths) {
+    if (allHadiths.isEmpty) return;
+    final randIndex = (DateTime.now().microsecondsSinceEpoch % allHadiths.length);
+    state = HadithOfTheDayState(
+      selectedHadithId: allHadiths[randIndex].id,
+      isRandomized: true,
+    );
+  }
+
+  void resetToToday() {
+    state = const HadithOfTheDayState(selectedHadithId: null, isRandomized: false);
+  }
+}
+
+final hadithOfTheDayProvider =
+    StateNotifierProvider<HadithOfTheDayNotifier, HadithOfTheDayState>((ref) {
+  return HadithOfTheDayNotifier();
+});
+
+// 14. Arabic Audio TTS Reciter Provider
+enum AudioPlaybackStatus { stopped, playing, paused }
+
+class AudioPlayerState {
+  final AudioPlaybackStatus status;
+  final int? currentHadithId;
+  final double playbackRate;
+
+  const AudioPlayerState({
+    this.status = AudioPlaybackStatus.stopped,
+    this.currentHadithId,
+    this.playbackRate = 0.85,
+  });
+
+  bool get isPlaying => status == AudioPlaybackStatus.playing;
+  bool get isPaused => status == AudioPlaybackStatus.paused;
+  bool get isStopped => status == AudioPlaybackStatus.stopped;
+
+  AudioPlayerState copyWith({
+    AudioPlaybackStatus? status,
+    int? currentHadithId,
+    double? playbackRate,
+  }) {
+    return AudioPlayerState(
+      status: status ?? this.status,
+      currentHadithId: currentHadithId ?? this.currentHadithId,
+      playbackRate: playbackRate ?? this.playbackRate,
+    );
+  }
+}
+
+class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
+  final FlutterTts _tts = FlutterTts();
+  bool _isInitialized = false;
+
+  AudioPlayerNotifier() : super(const AudioPlayerState()) {
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    try {
+      await _tts.setLanguage('ar');
+      await _tts.setSpeechRate(state.playbackRate);
+      await _tts.setPitch(1.0);
+
+      _tts.setStartHandler(() {
+        state = state.copyWith(status: AudioPlaybackStatus.playing);
+      });
+
+      _tts.setCompletionHandler(() {
+        state = state.copyWith(
+          status: AudioPlaybackStatus.stopped,
+          currentHadithId: null,
+        );
+      });
+
+      _tts.setCancelHandler(() {
+        state = state.copyWith(
+          status: AudioPlaybackStatus.stopped,
+          currentHadithId: null,
+        );
+      });
+
+      _tts.setPauseHandler(() {
+        state = state.copyWith(status: AudioPlaybackStatus.paused);
+      });
+
+      _tts.setContinueHandler(() {
+        state = state.copyWith(status: AudioPlaybackStatus.playing);
+      });
+
+      _tts.setErrorHandler((msg) {
+        state = state.copyWith(
+          status: AudioPlaybackStatus.stopped,
+          currentHadithId: null,
+        );
+      });
+
+      _isInitialized = true;
+    } catch (_) {}
+  }
+
+  Future<void> playHadith(HadithModel hadith) async {
+    if (!_isInitialized) {
+      await _initTts();
+    }
+
+    if (state.currentHadithId == hadith.id && state.isPaused) {
+      // Resume
+      state = state.copyWith(status: AudioPlaybackStatus.playing);
+    }
+
+    // Stop previous audio
+    await _tts.stop();
+
+    // Prepare clear text without quotation marks or footnotes symbols
+    final cleanTitle = hadith.title.trim();
+    final cleanNarrator = hadith.narrator.trim();
+    final cleanText = hadith.text
+        .replaceAll('«', '')
+        .replaceAll('»', '')
+        .replaceAll('"', '')
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .trim();
+
+    final speechText = '$cleanTitle. $cleanNarrator. $cleanText.';
+
+    state = state.copyWith(
+      status: AudioPlaybackStatus.playing,
+      currentHadithId: hadith.id,
+    );
+
+    await _tts.setLanguage('ar');
+    await _tts.setSpeechRate(state.playbackRate);
+    await _tts.speak(speechText);
+  }
+
+  Future<void> pause() async {
+    await _tts.pause();
+    state = state.copyWith(status: AudioPlaybackStatus.paused);
+  }
+
+  Future<void> stop() async {
+    await _tts.stop();
+    state = state.copyWith(
+      status: AudioPlaybackStatus.stopped,
+      currentHadithId: null,
+    );
+  }
+
+  Future<void> setRate(double rate) async {
+    state = state.copyWith(playbackRate: rate);
+    await _tts.setSpeechRate(rate);
+  }
+
+  @override
+  void dispose() {
+    _tts.stop();
+    super.dispose();
+  }
+}
+
+final audioPlayerProvider =
+    StateNotifierProvider<AudioPlayerNotifier, AudioPlayerState>((ref) {
+  return AudioPlayerNotifier();
 });

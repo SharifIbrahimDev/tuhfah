@@ -121,19 +121,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           width: 150,
                           height: 150,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: goldColor, width: 3),
+                            borderRadius: BorderRadius.circular(34),
                             boxShadow: [
                               BoxShadow(
                                 color: (isDarkMode ? goldColor : titleColor)
-                                    .withValues(alpha: 0.12),
-                                blurRadius: 24,
-                                spreadRadius: 4,
+                                    .withValues(alpha: 0.25),
+                                blurRadius: 28,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 8),
                               )
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(75),
+                            borderRadius: BorderRadius.circular(34),
                             child: Image.asset(
                               'assets/data/logo.png',
                               fit: BoxFit.cover,

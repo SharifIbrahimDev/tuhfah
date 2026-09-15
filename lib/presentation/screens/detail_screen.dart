@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../data/models/hadith_model.dart';
 import '../../data/providers/hadith_provider.dart';
+import '../widgets/share_card_dialog.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
   final int hadithId;
@@ -27,6 +29,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   void initState() {
     super.initState();
     WakelockPlus.enable();
+
+    // Auto-record as last read hadith
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(lastReadProvider.notifier).setLastRead(widget.hadithId);
+    });
   }
 
   @override
@@ -106,14 +113,152 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     return TextSpan(children: spans);
   }
 
+  void _showNoteModal(BuildContext context, HadithModel hadith) {
+    final currentNote = ref.read(hadithNotesProvider)[hadith.id]?.note ?? '';
+    final textController = TextEditingController(text: currentNote);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        final theme = Theme.of(modalContext);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF13221C) : Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(modalContext),
+                    ),
+                    Text(
+                      'ملاحظاتي حول الحديث ${hadith.id}',
+                      style: GoogleFonts.tajawal(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    if (currentNote.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                        tooltip: 'حذف الملاحظة',
+                        onPressed: () {
+                          ref.read(hadithNotesProvider.notifier).deleteNote(hadith.id);
+                          Navigator.pop(modalContext);
+                        },
+                      )
+                    else
+                      const SizedBox(width: 48),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  hadith.title,
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: textController,
+                  maxLines: 5,
+                  textAlign: TextAlign.right,
+                  autofocus: true,
+                  style: GoogleFonts.tajawal(fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'سجل فوائدك وتأملاتك وملاحظاتك حول هذا الحديث...',
+                    hintStyle: GoogleFonts.tajawal(fontSize: 13),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF1A2D25) : const Color(0xFFF9F7F2),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () {
+                      ref.read(hadithNotesProvider.notifier).saveNote(
+                            hadith.id,
+                            textController.text,
+                          );
+                      Navigator.pop(modalContext);
+                    },
+                    icon: const Icon(Icons.check_rounded, size: 20),
+                    label: Text(
+                      'حفظ الملاحظة',
+                      style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hadithsAsync = ref.watch(hadithListProvider);
     final favoriteIds = ref.watch(favoritesProvider);
+    final notesMap = ref.watch(hadithNotesProvider);
+    final audioState = ref.watch(audioPlayerProvider);
     final fontSize = ref.watch(fontSizeProvider);
     final currentFontFamily = ref.watch(fontFamilyProvider);
     final isDark = theme.brightness == Brightness.dark;
+
+    final hasNote = notesMap.containsKey(widget.hadithId);
 
     return Scaffold(
       appBar: _isImmersionMode
@@ -125,6 +270,57 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               ),
               centerTitle: true,
               actions: [
+                // Notes Button
+                hadithsAsync.when(
+                  data: (hadiths) {
+                    final hadith =
+                        hadiths.firstWhere((h) => h.id == widget.hadithId, orElse: () => hadiths.first);
+                    return Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            hasNote ? Icons.note_alt_rounded : Icons.note_alt_outlined,
+                            color: hasNote ? theme.colorScheme.secondary : null,
+                          ),
+                          tooltip: hasNote ? 'تعديل ملاحظاتي' : 'إضافة ملاحظة',
+                          onPressed: () => _showNoteModal(context, hadith),
+                        ),
+                        if (hasNote)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.secondary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox(),
+                  error: (error, stack) => const SizedBox(),
+                ),
+
+                // Share as Luxury Image Card
+                hadithsAsync.when(
+                  data: (hadiths) {
+                    final hadith =
+                        hadiths.firstWhere((h) => h.id == widget.hadithId, orElse: () => hadiths.first);
+                    return IconButton(
+                      icon: const Icon(Icons.image_outlined),
+                      tooltip: 'مشاركة كبطاقة صورة',
+                      onPressed: () => ShareCardDialog.show(context, hadith),
+                    );
+                  },
+                  loading: () => const SizedBox(),
+                  error: (error, stack) => const SizedBox(),
+                ),
+
                 // Immersion Mode Toggle
                 IconButton(
                   icon: const Icon(Icons.fullscreen_rounded),
@@ -133,6 +329,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     setState(() => _isImmersionMode = true);
                   },
                 ),
+
                 // Bookmark Toggle
                 IconButton(
                   icon: Icon(
@@ -150,6 +347,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                         .toggleFavorite(widget.hadithId);
                   },
                 ),
+
                 // Copy & Share buttons
                 hadithsAsync.when(
                   data: (hadiths) {
@@ -183,7 +381,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.share_rounded),
-                          tooltip: 'مشاركة الحديث',
+                          tooltip: 'مشاركة الحديث نصياً',
                           onPressed: () {
                             Share.share(textToShare);
                           },
@@ -214,6 +412,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           final isPart1 = hadith.id <= 40;
           final tagColor =
               isPart1 ? theme.colorScheme.primary : theme.colorScheme.secondary;
+
+          final isAudioPlayingThis =
+              audioState.isPlaying && audioState.currentHadithId == hadith.id;
 
           return SafeArea(
             child: Column(
@@ -314,6 +515,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   ),
                 const Divider(height: 1),
 
+                // Arabic Audio Playback Bar
+                _buildAudioPlayerBar(hadith, audioState, theme),
+
                 // Main scrolling viewport
                 Expanded(
                   child: SingleChildScrollView(
@@ -373,15 +577,19 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 : const Color(0xFFF9F7F2),
                             borderRadius: BorderRadius.circular(26),
                             border: Border.all(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.22),
-                              width: 1.5,
+                              color: isAudioPlayingThis
+                                  ? theme.colorScheme.secondary
+                                  : theme.colorScheme.primary.withValues(alpha: 0.22),
+                              width: isAudioPlayingThis ? 2.0 : 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: isDark
-                                    ? const Color(0x3F000000)
-                                    : const Color(0x0C000000),
-                                blurRadius: 18,
+                                color: isAudioPlayingThis
+                                    ? theme.colorScheme.secondary.withValues(alpha: 0.2)
+                                    : (isDark
+                                        ? const Color(0x3F000000)
+                                        : const Color(0x0C000000)),
+                                blurRadius: isAudioPlayingThis ? 22 : 18,
                                 offset: const Offset(0, 8),
                               ),
                             ],
@@ -409,10 +617,43 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Source Badge
+                        // Source Badge & Note indicator chip
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            if (hasNote)
+                              GestureDetector(
+                                onTap: () => _showNoteModal(context, hadith),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.secondary.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: theme.colorScheme.secondary.withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.edit_note_rounded,
+                                          color: theme.colorScheme.secondary, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'توجد ملاحظة',
+                                        style: GoogleFonts.tajawal(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.secondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              const SizedBox.shrink(),
                             Flexible(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -540,6 +781,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                       horizontal: 14, vertical: 8),
                                 ),
                                 onPressed: () {
+                                  ref.read(audioPlayerProvider.notifier).stop();
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -576,6 +818,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                       horizontal: 14, vertical: 8),
                                 ),
                                 onPressed: () {
+                                  ref.read(audioPlayerProvider.notifier).stop();
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -612,6 +855,121 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) =>
             Center(child: Text('خطأ في تحميل البيانات: $err')),
+      ),
+    );
+  }
+
+  Widget _buildAudioPlayerBar(
+    HadithModel hadith,
+    AudioPlayerState audioState,
+    ThemeData theme,
+  ) {
+    final isDark = theme.brightness == Brightness.dark;
+    final isCurrentPlaying =
+        audioState.isPlaying && audioState.currentHadithId == hadith.id;
+    final isCurrentPaused =
+        audioState.isPaused && audioState.currentHadithId == hadith.id;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF14291F) : const Color(0xFFEFF8F3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isCurrentPlaying
+              ? theme.colorScheme.secondary
+              : theme.colorScheme.primary.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Playback Speed Toggle
+          PopupMenuButton<double>(
+            initialValue: audioState.playbackRate,
+            tooltip: 'سرعة القراءة',
+            onSelected: (rate) =>
+                ref.read(audioPlayerProvider.notifier).setRate(rate),
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 0.75, child: Text('٠٫٧٥× بطيء')),
+              const PopupMenuItem(value: 0.85, child: Text('عادي (مريح)')),
+              const PopupMenuItem(value: 1.0, child: Text('١٫٠× قياسي')),
+              const PopupMenuItem(value: 1.25, child: Text('١٫٢٥× سريع')),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${audioState.playbackRate}x',
+                style: GoogleFonts.tajawal(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+
+          // Title / Status description
+          Row(
+            children: [
+              if (isCurrentPlaying)
+                Icon(Icons.graphic_eq_rounded,
+                    color: theme.colorScheme.secondary, size: 18),
+              const SizedBox(width: 6),
+              Text(
+                isCurrentPlaying
+                    ? 'جارٍ تلاوة الحديث صوتياً...'
+                    : (isCurrentPaused
+                        ? 'التلاوة متوقفة مؤقتاً'
+                        : 'استماع للحديث الصوتي'),
+                style: GoogleFonts.tajawal(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isCurrentPlaying
+                      ? theme.colorScheme.secondary
+                      : theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+
+          // Control Buttons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isCurrentPlaying || isCurrentPaused)
+                IconButton(
+                  icon: const Icon(Icons.stop_rounded, size: 20),
+                  tooltip: 'إيقاف',
+                  onPressed: () =>
+                      ref.read(audioPlayerProvider.notifier).stop(),
+                ),
+              IconButton(
+                icon: Icon(
+                  isCurrentPlaying
+                      ? Icons.pause_circle_filled_rounded
+                      : Icons.play_circle_fill_rounded,
+                  color: theme.colorScheme.primary,
+                  size: 28,
+                ),
+                tooltip: isCurrentPlaying ? 'إيقاف مؤقت' : 'استماع',
+                onPressed: () {
+                  if (isCurrentPlaying) {
+                    ref.read(audioPlayerProvider.notifier).pause();
+                  } else {
+                    ref.read(audioPlayerProvider.notifier).playHadith(hadith);
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -8,6 +8,8 @@ import '../screens/settings_screen.dart';
 import '../screens/toc_screen.dart';
 import '../screens/pdf_viewer_screen.dart';
 import '../screens/about_screen.dart';
+import '../screens/quiz_screen.dart';
+import '../screens/notes_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
   final TabController tabController;
@@ -21,6 +23,7 @@ class AppDrawer extends ConsumerWidget {
     final green = theme.colorScheme.primary;
     final gold = theme.colorScheme.secondary;
     final favoriteIds = ref.watch(favoritesProvider);
+    final notesMap = ref.watch(hadithNotesProvider);
     final currentThemeMode = ref.watch(themeModeProvider);
 
     return Drawer(
@@ -78,8 +81,7 @@ class AppDrawer extends ConsumerWidget {
                       width: 68,
                       height: 68,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: gold, width: 2),
+                        borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
                             color: gold.withValues(alpha: 0.35),
@@ -88,7 +90,7 @@ class AppDrawer extends ConsumerWidget {
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(34),
+                        borderRadius: BorderRadius.circular(18),
                         child: Image.asset(
                           'assets/data/logo.png',
                           fit: BoxFit.cover,
@@ -133,9 +135,9 @@ class AppDrawer extends ConsumerWidget {
                     children: [
                       _StatChip(label: 'الأحاديث', value: '٨٠'),
                       Container(height: 18, width: 1, color: Colors.white.withValues(alpha: 0.2)),
-                      _StatChip(label: 'الأجزاء', value: '٢'),
-                      Container(height: 18, width: 1, color: Colors.white.withValues(alpha: 0.2)),
                       _StatChip(label: 'المفضلة', value: '${favoriteIds.length}'),
+                      Container(height: 18, width: 1, color: Colors.white.withValues(alpha: 0.2)),
+                      _StatChip(label: 'الملاحظات', value: '${notesMap.length}'),
                     ],
                   ),
                 ),
@@ -156,6 +158,32 @@ class AppDrawer extends ConsumerWidget {
                   onTap: () {
                     Navigator.pop(context);
                     tabController.animateTo(0);
+                  },
+                ),
+                _DrawerTile(
+                  title: 'اختبر حفظك ومعلوماتك',
+                  icon: Icons.quiz_rounded,
+                  iconColor: const Color(0xFF00897B),
+                  badge: 'جديد',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const QuizScreen()),
+                    );
+                  },
+                ),
+                _DrawerTile(
+                  title: 'ملاحظاتي وتأملاتي',
+                  icon: Icons.edit_note_rounded,
+                  iconColor: gold,
+                  badge: notesMap.isNotEmpty ? '${notesMap.length}' : null,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NotesScreen()),
+                    );
                   },
                 ),
                 _DrawerTile(

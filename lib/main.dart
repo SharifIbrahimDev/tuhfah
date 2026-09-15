@@ -46,7 +46,7 @@ class TuhfahApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'تحفة الولدان',
+      title: 'تُحْفَةُ الوِلْدَانِ',
       debugShowCheckedModeBanner: false,
       scrollBehavior: const AppScrollBehavior(),
       theme: AppTheme.lightTheme,
