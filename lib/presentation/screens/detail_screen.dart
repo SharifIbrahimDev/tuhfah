@@ -354,7 +354,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     final hadith =
                         hadiths.firstWhere((h) => h.id == widget.hadithId);
                     final textToShare =
-                        '${hadith.title}\n\n${hadith.narrator}\n\n${hadith.text}\n\nالمصدر: ${hadith.source}${hadith.hadithNumber.isNotEmpty ? " (${hadith.hadithNumber})" : ""}\n\n— من تطبيق تحفة الولدان';
+                        '${hadith.title}\n\n${hadith.narrator}\n\n${hadith.text}\n\nالمصدر: ${hadith.source}${hadith.hadithNumber.isNotEmpty ? " (${hadith.hadithNumber})" : ""}\n\n— من كتاب تحفة الولدان (تأليف: الأستاذ إبراهيم شريف أبوبكر)';
 
                     return Row(
                       mainAxisSize: MainAxisSize.min,
@@ -477,6 +477,23 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   color: tagColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
                             ),
@@ -870,9 +887,25 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final isCurrentPaused =
         audioState.isPaused && audioState.currentHadithId == hadith.id;
 
+    String statusText;
+    if (isCurrentPlaying) {
+      if (audioState.repeatCount == -1) {
+        statusText = 'تكرار مستمر (الدورة ${audioState.currentRepeatIndex})...';
+      } else if (audioState.repeatCount > 1) {
+        statusText =
+            'تكرار ${audioState.currentRepeatIndex} من ${audioState.repeatCount}...';
+      } else {
+        statusText = 'جارٍ تلاوة الحديث صوتياً...';
+      }
+    } else if (isCurrentPaused) {
+      statusText = 'التلاوة متوقفة مؤقتاً';
+    } else {
+      statusText = 'استماع للحديث الصوتي';
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF14291F) : const Color(0xFFEFF8F3),
         borderRadius: BorderRadius.circular(16),
@@ -886,57 +919,175 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Playback Speed Toggle
-          PopupMenuButton<double>(
-            initialValue: audioState.playbackRate,
-            tooltip: 'سرعة القراءة',
-            onSelected: (rate) =>
-                ref.read(audioPlayerProvider.notifier).setRate(rate),
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 0.75, child: Text('٠٫٧٥× بطيء')),
-              const PopupMenuItem(value: 0.85, child: Text('عادي (مريح)')),
-              const PopupMenuItem(value: 1.0, child: Text('١٫٠× قياسي')),
-              const PopupMenuItem(value: 1.25, child: Text('١٫٢٥× سريع')),
-            ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${audioState.playbackRate}x',
-                style: GoogleFonts.tajawal(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+          // Audio Controls: Speed & Repeat Buttons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Speed Toggle
+              PopupMenuButton<double>(
+                initialValue: audioState.playbackRate,
+                tooltip: 'سرعة القراءة الصوتية',
+                onSelected: (rate) =>
+                    ref.read(audioPlayerProvider.notifier).setRate(rate),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 0.30,
+                    child: Text('٠٫٣٠× بطيء جداً (للتحفيظ)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 0.40,
+                    child: Text('٠٫٤٠× بطيء ومرتل',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 0.45,
+                    child: Text('٠٫٤٥× هادئ ومتأنٍ (افتراضي)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 0.55,
+                    child: Text('٠٫٥٥× معتدل',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 0.70,
+                    child: Text('٠٫٧٠× سريع',
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${audioState.playbackRate}x',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 6),
+              // Repeat Toggle
+              PopupMenuButton<int>(
+                initialValue: audioState.repeatCount,
+                tooltip: 'تكرار التلاوة للتحفيظ',
+                onSelected: (count) => ref
+                    .read(audioPlayerProvider.notifier)
+                    .setRepeatCount(count),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 1,
+                    child: Text('مرة واحدة (تشغيل عادي)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 3,
+                    child: Text('٣ مرات (تكرار للتحفيظ)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 5,
+                    child: Text('٥ مرات (تثبيت الحفظ)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: 10,
+                    child: Text('١٠ مرات (إتقان تام)',
+                        textAlign: TextAlign.right),
+                  ),
+                  const PopupMenuItem(
+                    value: -1,
+                    child: Text('تكرار مستمر بلا انقطاع (∞)',
+                        textAlign: TextAlign.right),
+                  ),
+                ],
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: audioState.repeatCount != 1
+                        ? theme.colorScheme.secondary.withValues(alpha: 0.18)
+                        : theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: audioState.repeatCount != 1
+                        ? Border.all(
+                            color: theme.colorScheme.secondary
+                                .withValues(alpha: 0.5),
+                            width: 1,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        audioState.repeatCount == 1
+                            ? Icons.repeat_rounded
+                            : (audioState.repeatCount == -1
+                                ? Icons.all_inclusive_rounded
+                                : Icons.repeat_one_rounded),
+                        size: 13,
+                        color: audioState.repeatCount != 1
+                            ? theme.colorScheme.secondary
+                            : theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        audioState.repeatCount == 1
+                            ? '١×'
+                            : (audioState.repeatCount == -1
+                                ? '∞'
+                                : '${audioState.repeatCount}×'),
+                        style: GoogleFonts.tajawal(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: audioState.repeatCount != 1
+                              ? theme.colorScheme.secondary
+                              : theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
 
           // Title / Status description
-          Row(
-            children: [
-              if (isCurrentPlaying)
-                Icon(Icons.graphic_eq_rounded,
-                    color: theme.colorScheme.secondary, size: 18),
-              const SizedBox(width: 6),
-              Text(
-                isCurrentPlaying
-                    ? 'جارٍ تلاوة الحديث صوتياً...'
-                    : (isCurrentPaused
-                        ? 'التلاوة متوقفة مؤقتاً'
-                        : 'استماع للحديث الصوتي'),
-                style: GoogleFonts.tajawal(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isCurrentPlaying
-                      ? theme.colorScheme.secondary
-                      : theme.colorScheme.primary,
-                ),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isCurrentPlaying) ...[
+                    Icon(Icons.graphic_eq_rounded,
+                        color: theme.colorScheme.secondary, size: 16),
+                    const SizedBox(width: 4),
+                  ],
+                  Flexible(
+                    child: Text(
+                      statusText,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: isCurrentPlaying
+                            ? theme.colorScheme.secondary
+                            : theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
 
           // Control Buttons
@@ -947,6 +1098,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 IconButton(
                   icon: const Icon(Icons.stop_rounded, size: 20),
                   tooltip: 'إيقاف',
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
                   onPressed: () =>
                       ref.read(audioPlayerProvider.notifier).stop(),
                 ),
@@ -959,6 +1113,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   size: 28,
                 ),
                 tooltip: isCurrentPlaying ? 'إيقاف مؤقت' : 'استماع',
+                padding: EdgeInsets.zero,
+                constraints:
+                    const BoxConstraints(minWidth: 36, minHeight: 36),
                 onPressed: () {
                   if (isCurrentPlaying) {
                     ref.read(audioPlayerProvider.notifier).pause();
