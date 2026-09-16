@@ -120,6 +120,23 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 const SizedBox(height: 14),
 
                 // Live Stats Banner
@@ -292,13 +309,21 @@ class AppDrawer extends ConsumerWidget {
           // Modern Footer
           Container(
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
+                Text(
+                  'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: green,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   'مركز عبدالله بن مسعود • كدونا، نيجيريا',
                   style: GoogleFonts.tajawal(
-                    fontSize: 11,
+                    fontSize: 10,
                     color: isDark ? Colors.grey[500] : Colors.grey[600],
                   ),
                 ),
