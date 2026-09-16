@@ -345,11 +345,15 @@ class AudioPlayerState {
   final AudioPlaybackStatus status;
   final int? currentHadithId;
   final double playbackRate;
+  final int repeatCount; // 1 = once, 3 = 3 times, 5 = 5 times, 10 = 10 times, -1 = infinite loop
+  final int currentRepeatIndex;
 
   const AudioPlayerState({
     this.status = AudioPlaybackStatus.stopped,
     this.currentHadithId,
-    this.playbackRate = 0.85,
+    this.playbackRate = 0.45,
+    this.repeatCount = 1,
+    this.currentRepeatIndex = 1,
   });
 
   bool get isPlaying => status == AudioPlaybackStatus.playing;
@@ -360,20 +364,33 @@ class AudioPlayerState {
     AudioPlaybackStatus? status,
     int? currentHadithId,
     double? playbackRate,
+    int? repeatCount,
+    int? currentRepeatIndex,
   }) {
     return AudioPlayerState(
       status: status ?? this.status,
       currentHadithId: currentHadithId ?? this.currentHadithId,
       playbackRate: playbackRate ?? this.playbackRate,
+      repeatCount: repeatCount ?? this.repeatCount,
+      currentRepeatIndex: currentRepeatIndex ?? this.currentRepeatIndex,
     );
   }
 }
 
 class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   final FlutterTts _tts = FlutterTts();
+  final SharedPreferences? _prefs;
+  static const _rateKey = 'audio_playback_rate';
+  static const _repeatKey = 'audio_repeat_count';
   bool _isInitialized = false;
+  HadithModel? _currentHadith;
+  bool _isDisposed = false;
 
-  AudioPlayerNotifier() : super(const AudioPlayerState()) {
+  AudioPlayerNotifier([this._prefs])
+      : super(AudioPlayerState(
+          playbackRate: _prefs?.getDouble(_rateKey) ?? 0.45,
+          repeatCount: _prefs?.getInt(_repeatKey) ?? 1,
+        )) {
     _initTts();
   }
 
@@ -384,56 +401,114 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       await _tts.setPitch(1.0);
 
       _tts.setStartHandler(() {
-        state = state.copyWith(status: AudioPlaybackStatus.playing);
+        if (!_isDisposed) {
+          state = state.copyWith(status: AudioPlaybackStatus.playing);
+        }
       });
 
-      _tts.setCompletionHandler(() {
-        state = state.copyWith(
-          status: AudioPlaybackStatus.stopped,
-          currentHadithId: null,
-        );
+      _tts.setCompletionHandler(() async {
+        if (_isDisposed) return;
+
+        final canRepeatInfinite = state.repeatCount == -1;
+        final hasMoreRepeats =
+            state.repeatCount > 1 && state.currentRepeatIndex < state.repeatCount;
+
+        if ((canRepeatInfinite || hasMoreRepeats) &&
+            state.status == AudioPlaybackStatus.playing &&
+            _currentHadith != null) {
+          state = state.copyWith(
+            currentRepeatIndex: state.currentRepeatIndex + 1,
+          );
+          // Brief 1.2s pause between repetitions for breathing & reflection
+          await Future.delayed(const Duration(milliseconds: 1200));
+          if (!_isDisposed && state.isPlaying && _currentHadith != null) {
+            await _speakHadithText(_currentHadith!);
+          }
+        } else {
+          state = state.copyWith(
+            status: AudioPlaybackStatus.stopped,
+            currentHadithId: null,
+            currentRepeatIndex: 1,
+          );
+        }
       });
 
       _tts.setCancelHandler(() {
-        state = state.copyWith(
-          status: AudioPlaybackStatus.stopped,
-          currentHadithId: null,
-        );
+        if (!_isDisposed) {
+          state = state.copyWith(
+            status: AudioPlaybackStatus.stopped,
+            currentHadithId: null,
+            currentRepeatIndex: 1,
+          );
+        }
       });
 
       _tts.setPauseHandler(() {
-        state = state.copyWith(status: AudioPlaybackStatus.paused);
+        if (!_isDisposed) {
+          state = state.copyWith(status: AudioPlaybackStatus.paused);
+        }
       });
 
       _tts.setContinueHandler(() {
-        state = state.copyWith(status: AudioPlaybackStatus.playing);
+        if (!_isDisposed) {
+          state = state.copyWith(status: AudioPlaybackStatus.playing);
+        }
       });
 
       _tts.setErrorHandler((msg) {
-        state = state.copyWith(
-          status: AudioPlaybackStatus.stopped,
-          currentHadithId: null,
-        );
+        if (!_isDisposed) {
+          state = state.copyWith(
+            status: AudioPlaybackStatus.stopped,
+            currentHadithId: null,
+            currentRepeatIndex: 1,
+          );
+        }
       });
 
       _isInitialized = true;
     } catch (_) {}
   }
 
-  Future<void> playHadith(HadithModel hadith) async {
-    if (!_isInitialized) {
-      await _initTts();
+  String _buildSourceSpeech(String source, String hadithNumber) {
+    final cleanSource = source.trim();
+    final cleanNum = hadithNumber.trim();
+
+    if (cleanSource.isEmpty && cleanNum.isEmpty) {
+      return '';
     }
 
-    if (state.currentHadithId == hadith.id && state.isPaused) {
-      // Resume
-      state = state.copyWith(status: AudioPlaybackStatus.playing);
+    if (cleanNum.isEmpty) {
+      return cleanSource.endsWith('.') ? cleanSource : '$cleanSource.';
     }
 
-    // Stop previous audio
-    await _tts.stop();
+    // Format number segments with Arabic preposition "برقم"
+    // e.g. "البخاري: 1، مسلم: 1907" -> "البخاري برقم 1، ومسلم برقم 1907"
+    // e.g. "أبو داود: 1400، الترمذي: 2891" -> "أبو داود برقم 1400، والترمذي برقم 2891"
+    String formattedNum = cleanNum
+        .replaceAllMapped(RegExp(r'(\S+):\s*(\d+)'), (match) {
+          return '${match.group(1)} برقم ${match.group(2)}';
+        })
+        .replaceAll('، ', '، و')
+        .replaceAll('،', '، و');
 
-    // Prepare clear text without quotation marks or footnotes symbols
+    // If source is "متفق عليه"
+    if (cleanSource == 'متفق عليه') {
+      return 'متفق عليه. $formattedNum.';
+    }
+
+    // If source starts with "رواه" and formattedNum starts with that same book
+    if (cleanSource.startsWith('رواه ')) {
+      final bookName = cleanSource.substring(5).trim();
+      if (formattedNum.startsWith(bookName)) {
+        return 'رواه $formattedNum.';
+      }
+      return '$cleanSource. $formattedNum.';
+    }
+
+    return '$cleanSource. $formattedNum.';
+  }
+
+  Future<void> _speakHadithText(HadithModel hadith) async {
     final cleanTitle = hadith.title.trim();
     final cleanNarrator = hadith.narrator.trim();
     final cleanText = hadith.text
@@ -444,16 +519,39 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
         .replaceAll(')', '')
         .trim();
 
-    final speechText = '$cleanTitle. $cleanNarrator. $cleanText.';
+    final sourceSpeech = _buildSourceSpeech(hadith.source, hadith.hadithNumber);
 
-    state = state.copyWith(
-      status: AudioPlaybackStatus.playing,
-      currentHadithId: hadith.id,
-    );
+    final speechText = sourceSpeech.isNotEmpty
+        ? '$cleanTitle. $cleanNarrator. $cleanText. $sourceSpeech'
+        : '$cleanTitle. $cleanNarrator. $cleanText.';
 
     await _tts.setLanguage('ar');
     await _tts.setSpeechRate(state.playbackRate);
     await _tts.speak(speechText);
+  }
+
+  Future<void> playHadith(HadithModel hadith) async {
+    if (!_isInitialized) {
+      await _initTts();
+    }
+
+    _currentHadith = hadith;
+
+    if (state.currentHadithId == hadith.id && state.isPaused) {
+      // Resume
+      state = state.copyWith(status: AudioPlaybackStatus.playing);
+    }
+
+    // Stop previous audio
+    await _tts.stop();
+
+    state = state.copyWith(
+      status: AudioPlaybackStatus.playing,
+      currentHadithId: hadith.id,
+      currentRepeatIndex: 1,
+    );
+
+    await _speakHadithText(hadith);
   }
 
   Future<void> pause() async {
@@ -466,16 +564,28 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     state = state.copyWith(
       status: AudioPlaybackStatus.stopped,
       currentHadithId: null,
+      currentRepeatIndex: 1,
     );
   }
 
   Future<void> setRate(double rate) async {
     state = state.copyWith(playbackRate: rate);
     await _tts.setSpeechRate(rate);
+    if (_prefs != null) {
+      await _prefs.setDouble(_rateKey, rate);
+    }
+  }
+
+  Future<void> setRepeatCount(int count) async {
+    state = state.copyWith(repeatCount: count, currentRepeatIndex: 1);
+    if (_prefs != null) {
+      await _prefs.setInt(_repeatKey, count);
+    }
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _tts.stop();
     super.dispose();
   }
@@ -483,5 +593,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
 final audioPlayerProvider =
     StateNotifierProvider<AudioPlayerNotifier, AudioPlayerState>((ref) {
-  return AudioPlayerNotifier();
+  final prefs = ref.watch(sharedPrefsProvider);
+  return AudioPlayerNotifier(prefs);
 });
