@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../data/models/hadith_model.dart';
 import '../../data/providers/hadith_provider.dart';
 import 'detail_screen.dart';
 
@@ -121,6 +124,205 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     );
   }
 
+  void _showBackupDialog(BuildContext context, String jsonStr, int notesCount) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'نسخ احتياطي للملاحظات',
+                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.backup_rounded, color: theme.colorScheme.primary),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'تم تجهيز ملف النسخ الاحتياطي لعدد $notesCount ملاحظة بصيغة JSON. يمكنك نسخه أو مشاركته لحفظه بأمان.',
+                textAlign: TextAlign.right,
+                style: GoogleFonts.tajawal(fontSize: 13.5, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'تحفة الولدان • الأستاذ إبراهيم شريف أبوبكر',
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('إغلاق', style: GoogleFonts.tajawal()),
+            ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: jsonStr));
+                if (context.mounted) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'تم نسخ بيانات النسخ الاحتياطي إلى الحافظة',
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.tajawal(),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.copy_rounded, size: 18),
+              label: Text('نسخ البيانات', style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Share.share(
+                  jsonStr,
+                  subject: 'نسخة احتياطية لملاحظات كتاب تحفة الولدان',
+                );
+              },
+              icon: const Icon(Icons.share_rounded, size: 18),
+              label: Text('مشاركة الملف', style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRestoreDialog(BuildContext context) {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'استعادة الملاحظات',
+                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.restore_page_rounded, color: theme.colorScheme.secondary),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'الصق بيانات النسخ الاحتياطي (JSON) في الحقل أدناه لاستعادة ملاحظاتك:',
+                textAlign: TextAlign.right,
+                style: GoogleFonts.tajawal(fontSize: 13.5, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: textController,
+                maxLines: 5,
+                style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                decoration: InputDecoration(
+                  hintText: '{\n  "app": "Tuhfat Al-Wildan",\n  "notes": [...]\n}',
+                  hintStyle: const TextStyle(fontSize: 11),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  filled: true,
+                  fillColor: theme.colorScheme.surface,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('إلغاء', style: GoogleFonts.tajawal()),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                final jsonText = textController.text.trim();
+                if (jsonText.isEmpty) return;
+
+                final count = ref
+                    .read(hadithNotesProvider.notifier)
+                    .importNotesFromJson(jsonText);
+
+                Navigator.pop(dialogContext);
+
+                if (context.mounted) {
+                  if (count > 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'تم استعادة $count ملاحظة بنجاح!',
+                          textAlign: TextAlign.right,
+                          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                        ),
+                        backgroundColor: theme.colorScheme.primary,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'لم يتم العثور على ملاحظات صالحة أو صيغة البيانات غير صحيحة.',
+                          textAlign: TextAlign.right,
+                          style: GoogleFonts.tajawal(),
+                        ),
+                        backgroundColor: Colors.red[700],
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.check_rounded, size: 18),
+              label: Text('استعادة الآن', style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -135,6 +337,95 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [
+          // Export formatted text button
+          hadithsAsync.when(
+            data: (allHadiths) {
+              return IconButton(
+                icon: const Icon(Icons.share_rounded),
+                tooltip: 'تصدير ومشاركة جميع الملاحظات',
+                onPressed: () {
+                  if (notesMap.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'لا توجد ملاحظات مسجلة لتصديرها.',
+                          textAlign: TextAlign.right,
+                          style: GoogleFonts.tajawal(),
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final formattedText = ref
+                      .read(hadithNotesProvider.notifier)
+                      .exportNotesAsFormattedText(allHadiths);
+
+                  Share.share(
+                    formattedText,
+                    subject: 'ملاحظاتي من كتاب تحفة الولدان - الأستاذ إبراهيم شريف أبوبكر',
+                  );
+                },
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+
+          // Backup & Restore PopupMenu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            tooltip: 'النسخ الاحتياطي والاستعادة',
+            onSelected: (value) {
+              if (value == 'backup') {
+                if (notesMap.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'لا توجد ملاحظات مسجلة للنسخ الاحتياطي.',
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.tajawal(),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                final jsonStr =
+                    ref.read(hadithNotesProvider.notifier).exportNotesAsJson();
+                _showBackupDialog(context, jsonStr, notesMap.length);
+              } else if (value == 'restore') {
+                _showRestoreDialog(context);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'backup',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('نسخ احتياطي (JSON)', style: GoogleFonts.tajawal(fontSize: 13.5)),
+                    const SizedBox(width: 10),
+                    Icon(Icons.backup_rounded, size: 19, color: theme.colorScheme.primary),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'restore',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('استعادة ملاحظات (JSON)', style: GoogleFonts.tajawal(fontSize: 13.5)),
+                    const SizedBox(width: 10),
+                    Icon(Icons.restore_page_rounded, size: 19, color: theme.colorScheme.secondary),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: hadithsAsync.when(
         data: (allHadiths) {
