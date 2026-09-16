@@ -69,45 +69,78 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     }
   }
 
-  TextSpan _buildHighlightedText(
-    String text,
-    String? query,
-    TextStyle baseStyle,
-    Color highlightBg,
-  ) {
-    if (query == null || query.trim().isEmpty) {
+  static String _stripTashkeel(String s) {
+    return s
+        .replaceAll(RegExp(r'[\u064B-\u065F\u0670\u0640]'), '')
+        .replaceAll(RegExp(r'[^\w\s\u0600-\u06FF]', unicode: true), '')
+        .trim();
+  }
+
+  TextSpan _buildHighlightedText({
+    required String text,
+    String? searchQuery,
+    String? spokenWord,
+    required TextStyle baseStyle,
+    required Color searchHighlightBg,
+    required Color audioHighlightBg,
+    required Color audioHighlightTextColor,
+  }) {
+    final cleanSpoken = spokenWord != null ? _stripTashkeel(spokenWord) : '';
+    final hasAudioHighlight = cleanSpoken.isNotEmpty;
+    final cleanSearch = searchQuery != null && searchQuery.trim().isNotEmpty
+        ? searchQuery.trim().toLowerCase()
+        : '';
+
+    // If neither is active, return pure text
+    if (!hasAudioHighlight && cleanSearch.isEmpty) {
       return TextSpan(text: text, style: baseStyle);
     }
 
-    final cleanQuery = query.trim().toLowerCase();
-    final lowerText = text.toLowerCase();
+    // Split text into tokens (words and delimiters/whitespace)
+    final tokenRegex = RegExp(r'(\s+|[^\s\w\u0600-\u06FF]+|[\w\u0600-\u06FF]+)');
+    final matches = tokenRegex.allMatches(text);
+    if (matches.isEmpty) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+
     final spans = <TextSpan>[];
-    int start = 0;
 
-    while (true) {
-      final index = lowerText.indexOf(cleanQuery, start);
-      if (index == -1) {
-        if (start < text.length) {
-          spans.add(TextSpan(text: text.substring(start), style: baseStyle));
-        }
-        break;
-      }
+    for (final m in matches) {
+      final token = m.group(0) ?? '';
+      if (token.isEmpty) continue;
 
-      if (index > start) {
-        spans.add(TextSpan(text: text.substring(start, index), style: baseStyle));
-      }
+      final strippedToken = _stripTashkeel(token);
+      final isAudioMatch = hasAudioHighlight &&
+          strippedToken.isNotEmpty &&
+          (strippedToken == cleanSpoken ||
+              (cleanSpoken.length > 2 && strippedToken.contains(cleanSpoken)) ||
+              (strippedToken.length > 2 && cleanSpoken.contains(strippedToken)));
 
-      spans.add(
-        TextSpan(
-          text: text.substring(index, index + cleanQuery.length),
-          style: baseStyle.copyWith(
-            backgroundColor: highlightBg,
-            fontWeight: FontWeight.bold,
+      if (isAudioMatch) {
+        spans.add(
+          TextSpan(
+            text: token,
+            style: baseStyle.copyWith(
+              backgroundColor: audioHighlightBg,
+              color: audioHighlightTextColor,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-        ),
-      );
-
-      start = index + cleanQuery.length;
+        );
+      } else if (cleanSearch.isNotEmpty &&
+          token.toLowerCase().contains(cleanSearch)) {
+        spans.add(
+          TextSpan(
+            text: token,
+            style: baseStyle.copyWith(
+              backgroundColor: searchHighlightBg,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      } else {
+        spans.add(TextSpan(text: token, style: baseStyle));
+      }
     }
 
     return TextSpan(children: spans);
@@ -413,8 +446,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           final tagColor =
               isPart1 ? theme.colorScheme.primary : theme.colorScheme.secondary;
 
-          final isAudioPlayingThis =
-              audioState.isPlaying && audioState.currentHadithId == hadith.id;
+          final audioHighlightBg = isDark
+              ? const Color(0xFFD4AF37).withValues(alpha: 0.45)
+              : const Color(0xFFD4AF37).withValues(alpha: 0.38);
+          final audioHighlightTextColor = isDark
+              ? const Color(0xFFFDE68A)
+              : const Color(0xFF13221C);
 
           return SafeArea(
             child: Column(
@@ -620,15 +657,45 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 width: 1.2,
                               ),
                             ),
-                            child: SelectableText.rich(
-                              _buildHighlightedText(
-                                hadith.text,
-                                widget.searchQuery,
-                                baseStyle,
-                                highlightBg,
-                              ),
-                              textAlign: TextAlign.center,
-                              textDirection: TextDirection.rtl,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isAudioPlayingThis)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 10.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.volume_up_rounded,
+                                            size: 15, color: theme.colorScheme.secondary),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'تلاوة صوتية جارية مع تظليل الكلمات',
+                                          style: GoogleFonts.tajawal(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.secondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                SelectableText.rich(
+                                  _buildHighlightedText(
+                                    text: hadith.text,
+                                    searchQuery: widget.searchQuery,
+                                    spokenWord: isAudioPlayingThis
+                                        ? audioState.currentSpokenWord
+                                        : null,
+                                    baseStyle: baseStyle,
+                                    searchHighlightBg: highlightBg,
+                                    audioHighlightBg: audioHighlightBg,
+                                    audioHighlightTextColor: audioHighlightTextColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ],
                             ),
                           ),
                         ),
