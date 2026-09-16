@@ -53,10 +53,51 @@ class _TocScreenState extends ConsumerState<TocScreen> {
 
           return Column(
             children: [
+              // Author attribution banner
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: green.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: green.withValues(alpha: 0.18)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '٨٠ حديثاً شريفاً',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: gold,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: green,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(Icons.person_outline_rounded, color: green, size: 16),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               // Search input
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                 child: Container(
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF14241D) : Colors.white,
