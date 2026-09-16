@@ -308,6 +308,26 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     height: 1.5,
                   ),
                 ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFC5A059).withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFC5A059).withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'من كتاب تحفة الولدان • تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFFDE68A),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
