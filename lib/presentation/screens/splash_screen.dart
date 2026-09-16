@@ -168,6 +168,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           textAlign: TextAlign.center,
                         ),
                         
+                        const SizedBox(height: 12),
+                        
+                        // Author Name Attribution
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: (isDarkMode ? goldColor : titleColor).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: (isDarkMode ? goldColor : titleColor).withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? const Color(0xFFF0E6D2) : const Color(0xFF006B3F),
+                            ),
+                          ),
+                        ),
+                        
                         const Spacer(flex: 2),
                         
                         // Loading state / Progress Indicator
