@@ -15,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
     final fontSize = ref.watch(fontSizeProvider);
     final currentFontFamily = ref.watch(fontFamilyProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    final audioState = ref.watch(audioPlayerProvider);
     final isLight = theme.brightness == Brightness.light;
 
     final cardDecoration = BoxDecoration(
@@ -302,7 +303,134 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
-          // Section 5: About Screen Navigation
+          // Section 5: Audio Recitation Speed
+          Text(
+            'سرعة القراءة الصوتية',
+            textAlign: TextAlign.right,
+            style: GoogleFonts.tajawal(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: cardDecoration,
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+            child: Column(
+              children: [
+                _SpeedOptionTile(
+                  title: 'بطيء جداً (٠٫٣٠×) — مناسب للتحفيظ والتكرار',
+                  isSelected: audioState.playbackRate == 0.30,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRate(0.30),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _SpeedOptionTile(
+                  title: 'بطيء ومرتل (٠٫٤٠×)',
+                  isSelected: audioState.playbackRate == 0.40,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRate(0.40),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _SpeedOptionTile(
+                  title: 'هادئ ومتأنٍ (٠٫٤٥×) — الافتراضي الموصى به',
+                  isSelected: audioState.playbackRate == 0.45,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRate(0.45),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _SpeedOptionTile(
+                  title: 'معتدل (٠٫٥٥×)',
+                  isSelected: audioState.playbackRate == 0.55,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRate(0.55),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _SpeedOptionTile(
+                  title: 'سريع (٠٫٧٠×)',
+                  isSelected: audioState.playbackRate == 0.70,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRate(0.70),
+                  activeColor: theme.colorScheme.primary,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Section 6: Audio Repeat for Memorization
+          Text(
+            'تكرار التلاوة للتحفيظ',
+            textAlign: TextAlign.right,
+            style: GoogleFonts.tajawal(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: cardDecoration,
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+            child: Column(
+              children: [
+                _RepeatOptionTile(
+                  title: 'مرة واحدة (تشغيل عادي بدون تكرار)',
+                  icon: Icons.repeat_rounded,
+                  isSelected: audioState.repeatCount == 1,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRepeatCount(1),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _RepeatOptionTile(
+                  title: '٣ مرات — تكرار أولي للتحفيظ',
+                  icon: Icons.repeat_one_rounded,
+                  isSelected: audioState.repeatCount == 3,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRepeatCount(3),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _RepeatOptionTile(
+                  title: '٥ مرات — تثبيت الحفظ ومراجعته',
+                  icon: Icons.repeat_one_rounded,
+                  isSelected: audioState.repeatCount == 5,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRepeatCount(5),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _RepeatOptionTile(
+                  title: '١٠ مرات — إتقان ورسوخ تام',
+                  icon: Icons.repeat_one_rounded,
+                  isSelected: audioState.repeatCount == 10,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRepeatCount(10),
+                  activeColor: theme.colorScheme.primary,
+                ),
+                _RepeatOptionTile(
+                  title: 'تكرار مستمر بلا انقطاع (∞)',
+                  icon: Icons.all_inclusive_rounded,
+                  isSelected: audioState.repeatCount == -1,
+                  onTap: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .setRepeatCount(-1),
+                  activeColor: theme.colorScheme.primary,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Section 7: About Screen Navigation
           Container(
             decoration: cardDecoration,
             child: ListTile(
@@ -331,6 +459,57 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+}
+
+class _SpeedOptionTile extends StatelessWidget {
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final Color activeColor;
+
+  const _SpeedOptionTile({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+    required this.activeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 9.0),
+        child: Row(
+          children: [
+            if (isSelected)
+              Icon(Icons.check_circle, color: activeColor, size: 20)
+            else
+              Icon(Icons.circle_outlined,
+                  color: Colors.grey.withValues(alpha: 0.4), size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.right,
+                style: GoogleFonts.tajawal(
+                  fontSize: 13.5,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.speed_rounded,
+                color: isSelected
+                    ? activeColor
+                    : Colors.grey.withValues(alpha: 0.45),
+                size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -439,6 +618,59 @@ class _FontOptionTile extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RepeatOptionTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final Color activeColor;
+
+  const _RepeatOptionTile({
+    required this.title,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+    required this.activeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 9.0),
+        child: Row(
+          children: [
+            if (isSelected)
+              Icon(Icons.check_circle, color: activeColor, size: 20)
+            else
+              Icon(Icons.circle_outlined,
+                  color: Colors.grey.withValues(alpha: 0.4), size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.right,
+                style: GoogleFonts.tajawal(
+                  fontSize: 13.5,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(icon,
+                color: isSelected
+                    ? activeColor
+                    : Colors.grey.withValues(alpha: 0.45),
+                size: 20),
           ],
         ),
       ),
