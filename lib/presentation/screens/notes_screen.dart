@@ -187,6 +187,22 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                         height: 1.6,
                       ),
                     ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        'تحفة الولدان • تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
