@@ -617,7 +617,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           tooltip: 'مشاركة نصياً',
                           onPressed: () {
                             Share.share(
-                              '🌟 حديث من تحفة الولدان:\n\n'
+                              '🌟 حديث من تحفة الولدان\n'
+                              'تأليف: الأستاذ إبراهيم شريف أبوبكر\n\n'
                               '${hadith.title}\n\n'
                               '${hadith.narrator}\n\n'
                               '${hadith.text}\n\n'
@@ -1040,6 +1041,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   style: GoogleFonts.tajawal(
                     fontSize: 13,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_pin_rounded,
+                          size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
