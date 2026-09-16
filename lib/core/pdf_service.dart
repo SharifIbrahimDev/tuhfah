@@ -224,7 +224,7 @@ class PdfService {
                             ),
                           ),
                           Text(
-                            'النسخة المطبوعة كاملة بصيغة PDF (٣.٢ ميجابايت)',
+                            'تأليف: الأستاذ إبراهيم شريف أبوبكر • PDF (٣.٢ ميجابايت)',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
                               color: gold,
