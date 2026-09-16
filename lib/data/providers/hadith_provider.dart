@@ -297,6 +297,125 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
     });
     await _prefs.setString(_key, json.encode(mapToSave));
   }
+
+  String exportNotesAsFormattedText(List<HadithModel> allHadiths) {
+    if (state.isEmpty) return '';
+    final buffer = StringBuffer();
+    final now = DateTime.now();
+    final dateFormatted =
+        '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
+
+    buffer.writeln('════════════════════════════════════');
+    buffer.writeln('📖 ملاحظات وتأملات من كتاب: تُحْفَةُ الوِلْدَانِ فِي الأَحَادِيثِ النَّبَوِيَّةِ');
+    buffer.writeln('✍️ تأليف: الأستاذ إبراهيم شريف أبوبكر');
+    buffer.writeln('📅 تاريخ التصدير: $dateFormatted');
+    buffer.writeln('🔢 إجمالي الملاحظات: ${state.length}');
+    buffer.writeln('════════════════════════════════════\n');
+
+    final sortedEntries = state.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    for (final entry in sortedEntries) {
+      final hadith = allHadiths.firstWhere(
+        (h) => h.id == entry.key,
+        orElse: () => HadithModel(
+          id: entry.key,
+          title: 'الحديث ${entry.key}',
+          narrator: '',
+          text: '',
+          source: '',
+          hadithNumber: '',
+          footnotes: [],
+        ),
+      );
+
+      final noteDate =
+          '${entry.value.updatedAt.year}/${entry.value.updatedAt.month.toString().padLeft(2, '0')}/${entry.value.updatedAt.day.toString().padLeft(2, '0')}';
+
+      buffer.writeln('🔹 [الحديث ${entry.key}]: ${hadith.title}');
+      if (hadith.narrator.isNotEmpty) {
+        buffer.writeln('👤 الراوي: ${hadith.narrator}');
+      }
+      if (hadith.text.isNotEmpty) {
+        buffer.writeln('📜 نص الحديث:\n«${hadith.text}»');
+      }
+      if (hadith.source.isNotEmpty) {
+        buffer.writeln('📚 التخريج: ${hadith.source}${hadith.hadithNumber.isNotEmpty ? " (${hadith.hadithNumber})" : ""}');
+      }
+      buffer.writeln('💡 الملاحظة والفوائد:');
+      buffer.writeln(entry.value.note);
+      buffer.writeln('🕒 آخر تعديل: $noteDate');
+      buffer.writeln('────────────────────────────────────\n');
+    }
+
+    buffer.writeln('✨ تم التصدير عبر تطبيق «تحفة الولدان» • تأليف: الأستاذ إبراهيم شريف أبوبكر');
+    return buffer.toString();
+  }
+
+  String exportNotesAsJson() {
+    final list = state.values.map((n) => n.toJson()).toList();
+    final backupData = {
+      'app': 'Tuhfat Al-Wildan',
+      'author': 'الأستاذ إبراهيم شريف أبوبكر',
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'notesCount': list.length,
+      'notes': list,
+    };
+    return const JsonEncoder.withIndent('  ').convert(backupData);
+  }
+
+  int importNotesFromJson(String jsonStr) {
+    try {
+      final dynamic decoded = json.decode(jsonStr);
+      final updated = Map<int, HadithNote>.from(state);
+      int importedCount = 0;
+
+      if (decoded is Map<String, dynamic>) {
+        if (decoded.containsKey('notes') && decoded['notes'] is List) {
+          final notesList = decoded['notes'] as List;
+          for (final item in notesList) {
+            if (item is Map<String, dynamic>) {
+              final note = HadithNote.fromJson(item);
+              if (note.hadithId > 0 && note.note.trim().isNotEmpty) {
+                updated[note.hadithId] = note;
+                importedCount++;
+              }
+            }
+          }
+        } else {
+          decoded.forEach((key, value) {
+            final id = int.tryParse(key);
+            if (id != null && value is Map<String, dynamic>) {
+              final note = HadithNote.fromJson(value);
+              if (note.note.trim().isNotEmpty) {
+                updated[id] = note;
+                importedCount++;
+              }
+            }
+          });
+        }
+      } else if (decoded is List) {
+        for (final item in decoded) {
+          if (item is Map<String, dynamic>) {
+            final note = HadithNote.fromJson(item);
+            if (note.hadithId > 0 && note.note.trim().isNotEmpty) {
+              updated[note.hadithId] = note;
+              importedCount++;
+            }
+          }
+        }
+      }
+
+      if (importedCount > 0) {
+        state = updated;
+        _persist();
+      }
+      return importedCount;
+    } catch (_) {
+      return 0;
+    }
+  }
 }
 
 final hadithNotesProvider =
@@ -347,6 +466,9 @@ class AudioPlayerState {
   final double playbackRate;
   final int repeatCount; // 1 = once, 3 = 3 times, 5 = 5 times, 10 = 10 times, -1 = infinite loop
   final int currentRepeatIndex;
+  final int currentWordStart;
+  final int currentWordEnd;
+  final String currentSpokenWord;
 
   const AudioPlayerState({
     this.status = AudioPlaybackStatus.stopped,
@@ -354,6 +476,9 @@ class AudioPlayerState {
     this.playbackRate = 0.45,
     this.repeatCount = 1,
     this.currentRepeatIndex = 1,
+    this.currentWordStart = 0,
+    this.currentWordEnd = 0,
+    this.currentSpokenWord = '',
   });
 
   bool get isPlaying => status == AudioPlaybackStatus.playing;
@@ -366,6 +491,9 @@ class AudioPlayerState {
     double? playbackRate,
     int? repeatCount,
     int? currentRepeatIndex,
+    int? currentWordStart,
+    int? currentWordEnd,
+    String? currentSpokenWord,
   }) {
     return AudioPlayerState(
       status: status ?? this.status,
@@ -373,6 +501,9 @@ class AudioPlayerState {
       playbackRate: playbackRate ?? this.playbackRate,
       repeatCount: repeatCount ?? this.repeatCount,
       currentRepeatIndex: currentRepeatIndex ?? this.currentRepeatIndex,
+      currentWordStart: currentWordStart ?? this.currentWordStart,
+      currentWordEnd: currentWordEnd ?? this.currentWordEnd,
+      currentSpokenWord: currentSpokenWord ?? this.currentSpokenWord,
     );
   }
 }
@@ -400,9 +531,30 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       await _tts.setSpeechRate(state.playbackRate);
       await _tts.setPitch(1.0);
 
+      try {
+        await _tts.setIosAudioCategory(
+          IosTextToSpeechAudioCategory.playback,
+          [
+            IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+            IosTextToSpeechAudioCategoryOptions.defaultToSpeaker,
+          ],
+          IosTextToSpeechAudioMode.defaultMode,
+        );
+      } catch (_) {}
+
       _tts.setStartHandler(() {
         if (!_isDisposed) {
           state = state.copyWith(status: AudioPlaybackStatus.playing);
+        }
+      });
+
+      _tts.setProgressHandler((String text, int start, int end, String word) {
+        if (!_isDisposed && state.isPlaying) {
+          state = state.copyWith(
+            currentWordStart: start,
+            currentWordEnd: end,
+            currentSpokenWord: word,
+          );
         }
       });
 
@@ -418,6 +570,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             _currentHadith != null) {
           state = state.copyWith(
             currentRepeatIndex: state.currentRepeatIndex + 1,
+            currentWordStart: 0,
+            currentWordEnd: 0,
+            currentSpokenWord: '',
           );
           // Brief 1.2s pause between repetitions for breathing & reflection
           await Future.delayed(const Duration(milliseconds: 1200));
@@ -429,6 +584,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             status: AudioPlaybackStatus.stopped,
             currentHadithId: null,
             currentRepeatIndex: 1,
+            currentWordStart: 0,
+            currentWordEnd: 0,
+            currentSpokenWord: '',
           );
         }
       });
@@ -439,6 +597,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             status: AudioPlaybackStatus.stopped,
             currentHadithId: null,
             currentRepeatIndex: 1,
+            currentWordStart: 0,
+            currentWordEnd: 0,
+            currentSpokenWord: '',
           );
         }
       });
@@ -461,6 +622,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
             status: AudioPlaybackStatus.stopped,
             currentHadithId: null,
             currentRepeatIndex: 1,
+            currentWordStart: 0,
+            currentWordEnd: 0,
+            currentSpokenWord: '',
           );
         }
       });
@@ -483,7 +647,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
     // Format number segments with Arabic preposition "برقم"
     // e.g. "البخاري: 1، مسلم: 1907" -> "البخاري برقم 1، ومسلم برقم 1907"
-    // e.g. "أبو داود: 1400، الترمذي: 2891" -> "أبو داود برقم 1400، والترمذي برقم 2891"
     String formattedNum = cleanNum
         .replaceAllMapped(RegExp(r'(\S+):\s*(\d+)'), (match) {
           return '${match.group(1)} برقم ${match.group(2)}';
@@ -538,7 +701,6 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     _currentHadith = hadith;
 
     if (state.currentHadithId == hadith.id && state.isPaused) {
-      // Resume
       state = state.copyWith(status: AudioPlaybackStatus.playing);
     }
 
@@ -549,6 +711,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       status: AudioPlaybackStatus.playing,
       currentHadithId: hadith.id,
       currentRepeatIndex: 1,
+      currentWordStart: 0,
+      currentWordEnd: 0,
+      currentSpokenWord: '',
     );
 
     await _speakHadithText(hadith);
@@ -565,6 +730,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
       status: AudioPlaybackStatus.stopped,
       currentHadithId: null,
       currentRepeatIndex: 1,
+      currentWordStart: 0,
+      currentWordEnd: 0,
+      currentSpokenWord: '',
     );
   }
 
