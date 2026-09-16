@@ -56,7 +56,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
         await Share.shareXFiles(
           [XFile(file.path)],
           text:
-              '«${widget.hadith.title}»\n${widget.hadith.text}\n\nالمصدر: ${widget.hadith.source}\n— من تطبيق تحفة الولدان',
+              '«${widget.hadith.title}»\n${widget.hadith.text}\n\nالمصدر: ${widget.hadith.source}\n— من كتاب تحفة الولدان\nتأليف: الأستاذ إبراهيم شريف أبوبكر',
         );
       }
     } catch (e) {
@@ -292,18 +292,32 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   ),
                 ),
               ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'تُحْفَةُ الوِلْدَانِ',
+                        style: GoogleFonts.tajawal(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.auto_stories_rounded, color: goldColor, size: 16),
+                    ],
+                  ),
                   Text(
-                    'تُحْفَةُ الوِلْدَانِ',
+                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
+                      color: goldColor,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.auto_stories_rounded, color: goldColor, size: 16),
                 ],
               ),
             ],
@@ -364,10 +378,11 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'مركز عبدالله بن مسعود • كدونا',
+                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
                 style: GoogleFonts.tajawal(
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.75),
                   fontSize: 10,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               Container(
@@ -431,18 +446,32 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   ),
                 ),
               ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'تُحْفَةُ الوِلْدَانِ',
+                        style: GoogleFonts.tajawal(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.auto_awesome_rounded, color: goldColor, size: 16),
+                    ],
+                  ),
                   Text(
-                    'تُحْفَةُ الوِلْدَانِ',
+                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
+                      color: goldColor,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.auto_awesome_rounded, color: goldColor, size: 16),
                 ],
               ),
             ],
@@ -499,10 +528,11 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'مركز عبدالله بن مسعود • كدونا',
+                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
                 style: GoogleFonts.tajawal(
-                  color: Colors.white.withValues(alpha: 0.55),
+                  color: Colors.white.withValues(alpha: 0.75),
                   fontSize: 10,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               Container(
@@ -563,18 +593,32 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   ),
                 ),
               ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'تُحْفَةُ الوِلْدَانِ',
+                        style: GoogleFonts.tajawal(
+                          color: greenBorder,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.menu_book_rounded, color: goldAccent, size: 16),
+                    ],
+                  ),
                   Text(
-                    'تُحْفَةُ الوِلْدَانِ',
+                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
-                      color: greenBorder,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
+                      color: goldAccent,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.menu_book_rounded, color: goldAccent, size: 16),
                 ],
               ),
             ],
@@ -631,10 +675,11 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'مركز عبدالله بن مسعود • كدونا',
+                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
                 style: GoogleFonts.tajawal(
-                  color: const Color(0xFF7A8480),
+                  color: const Color(0xFF555E59),
                   fontSize: 10,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               Container(
