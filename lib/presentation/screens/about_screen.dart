@@ -10,61 +10,83 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0F1E15) : const Color(0xFFFAF7F0);
-    final green = const Color(0xFF006B3F);
-    final gold = const Color(0xFFC5A880);
-    final textColor = isDark ? const Color(0xFFECE6D9) : const Color(0xFF1a1a1a);
+    const green = Color(0xFF006B3F);
+    const gold = Color(0xFFC5A880);
+    final cardBg = isDark ? const Color(0xFF16261E) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF1E362A) : const Color(0xFFEBE3D5);
+    final textColor = isDark ? const Color(0xFFECE6D9) : const Color(0xFF1A1A1A);
+    final subTextColor = isDark ? const Color(0xFF9EABA2) : const Color(0xFF5A6660);
 
-    Widget sectionTitle(String text) => Padding(
-          padding: const EdgeInsets.only(top: 24, bottom: 8),
-          child: Text(
-            text,
-            style: GoogleFonts.tajawal(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: gold,
-              letterSpacing: 0.5,
+    Widget buildInfoCard({
+      required String title,
+      required IconData icon,
+      required Widget content,
+    }) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            textAlign: TextAlign.center,
-          ),
-        );
-
-    Widget sectionBody(String text, {double fontSize = 16}) => Text(
-          text,
-          style: GoogleFonts.amiri(
-            fontSize: fontSize,
-            color: textColor,
-            height: 1.9,
-          ),
-          textAlign: TextAlign.center,
-        );
-
-    Widget divider() => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Divider(color: gold.withValues(alpha: 0.3), thickness: 0.8),
-        );
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: gold),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: gold,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(icon, size: 16, color: gold),
+              ],
+            ),
+            const SizedBox(height: 12),
+            content,
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
-          'عن الكتاب',
+          'عن الكتاب والناشر',
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
-            // Logo
+            // Book Cover Logo
             Container(
-              width: 100,
-              height: 100,
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.18),
@@ -74,45 +96,49 @@ class AboutScreen extends StatelessWidget {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
                 child: Image.asset('assets/data/logo.png', fit: BoxFit.cover),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Title
+            // Book Title
             Text(
               'تُحْفَةُ الوِلْدَانِ',
               style: GoogleFonts.tajawal(
-                fontSize: 28,
+                fontSize: 27,
                 fontWeight: FontWeight.w900,
                 color: green,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               'مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ',
-              style: GoogleFonts.amiri(fontSize: 17, color: gold),
+              style: GoogleFonts.amiri(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: gold,
+              ),
               textAlign: TextAlign.center,
             ),
 
-            divider(),
+            const SizedBox(height: 20),
 
-            // PDF Download Card
+            // PDF Download & Read Card
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
+              margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF14241B) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: gold.withValues(alpha: 0.3)),
+                color: cardBg,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: borderColor, width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -129,7 +155,7 @@ class AboutScreen extends StatelessWidget {
                         child: const Icon(
                           Icons.picture_as_pdf_rounded,
                           color: Color(0xFFE74C3C),
-                          size: 28,
+                          size: 26,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -142,14 +168,14 @@ class AboutScreen extends StatelessWidget {
                               style: GoogleFonts.tajawal(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
-                                color: isDark ? Colors.white : Colors.black87,
+                                color: textColor,
                               ),
                             ),
                             Text(
-                              'حجم الملف: ٣.٢ ميجابايت • جاهز للتنزيل والطباعة',
+                              'حجم الملف: ٣.٢ ميجابايت • جاهز للتحميل والطباعة',
                               style: GoogleFonts.tajawal(
-                                fontSize: 11,
-                                color: gold,
+                                fontSize: 11.5,
+                                color: subTextColor,
                               ),
                             ),
                           ],
@@ -195,7 +221,7 @@ class AboutScreen extends StatelessWidget {
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: green,
-                          side: BorderSide(color: green),
+                          side: const BorderSide(color: green),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -211,56 +237,194 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            divider(),
-
-            // About
-            sectionTitle('عن الكتاب'),
-            sectionBody(
-              'هذا الكتاب يشتمل على ثمانين حديثاً من أحاديث النبي ﷺ المتعلقة بالقرآن الكريم، '
-              'مرتبةً ومحققةً مع شروحات وتعليقات مفيدة لتساعد المدرسين والطلاب.',
+            // Section 1: Overview
+            buildInfoCard(
+              title: 'نُبْذَةٌ عَنِ الكِتَابِ',
+              icon: Icons.menu_book_rounded,
+              content: Text(
+                'هذا الكُتيّب يشتمل على ثمانين حديثاً من أحاديث النبي ﷺ المتعلقة بالقرآن الكريم، '
+                'جمعت ورتبت وحققت مع شروحات وتعليقات ميسرة لتساعد المدرسين والطلاب في مدارس تحفيظ القرآن الكريم والدراسات الإسلامية.',
+                style: GoogleFonts.amiri(
+                  fontSize: 16.5,
+                  color: textColor,
+                  height: 1.85,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
 
-            divider(),
-
-            // Author
-            sectionTitle('تَأْلِيفُ'),
-            sectionBody('الأستاذ إبراهيم شريف أبوبكر\nمدير مركز عبدالله بن مسعود'),
-
-            divider(),
-
-            // Presenter
-            sectionTitle('تَقْدِيمُ'),
-            sectionBody('فضيلة الشيخ الحافظ\n(أبو محمد) محمد أبوبكر'),
-
-            divider(),
-
-            // Reviewers
-            sectionTitle('مُرَاجَعَةُ أَسَانِيدِ الفَضِيلَةِ المَشَايِخِ'),
-            sectionBody(
-              'إبراهيم سليمان إبراهيم (تَاتَاجِي)\nعبدالله بن عمر\nأبوبكر شريف أبوبكر',
+            // Section 2: Author
+            buildInfoCard(
+              title: 'تَأْلِيفُ الكِتَابِ',
+              icon: Icons.edit_note_rounded,
+              content: Column(
+                children: [
+                  Text(
+                    'الأستاذ إبراهيم شريف أبوبكر',
+                    style: GoogleFonts.amiri(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'مدير مركز عبدالله بن مسعود لتحفيظ القرآن والدراسات الإسلامية',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      color: subTextColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
 
-            divider(),
-
-            // Publisher
-            sectionTitle('النَّاشِرُ'),
-            sectionBody(
-              'مركز عبدالله بن مسعود لتحفيظ القرآن الكريم والدراسات الإسلامية\nكدونا — نيجيريا',
+            // Section 3: Foreword / Taqdim
+            buildInfoCard(
+              title: 'تَقْدِيمُ الكِتَابِ وَتَقْرِيظُهُ',
+              icon: Icons.verified_user_outlined,
+              content: Column(
+                children: [
+                  Text(
+                    'فضيلة الشيخ الحافظ (أبو محمد) محمد أبوبكر',
+                    style: GoogleFonts.amiri(
+                      fontSize: 17.5,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    'عميد مركز عبدالله بن مسعود ومحاضر بجامعة ولاية كدونا',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12.5,
+                      color: subTextColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                    child: Divider(height: 1),
+                  ),
+                  Text(
+                    'فضيلة الشيخ إبراهيم سليمان إبراهيم (باباجي)',
+                    style: GoogleFonts.amiri(
+                      fontSize: 17.5,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    'مدير دار ابن تيمية — مندو، كدونا',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12.5,
+                      color: subTextColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
 
-            divider(),
+            // Section 4: Hadith Reviewers & Sanad Verification
+            buildInfoCard(
+              title: 'مُرَاجَعَةُ الأَسَانِيدِ وَالتَّدْقِيقُ',
+              icon: Icons.fact_check_outlined,
+              content: Column(
+                children: [
+                  Text(
+                    'فضيلة الشيخ إبراهيم سليمان إبراهيم (باباجي)',
+                    style: GoogleFonts.amiri(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'فضيلة الشيخ عبدالله بن عمر',
+                    style: GoogleFonts.amiri(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'الأستاذ أبوبكر شريف أبوبكر',
+                    style: GoogleFonts.amiri(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
 
-            // Edition
-            sectionTitle('الطَّبْعَةُ'),
-            sectionBody('الطبعة الأولى\n١٤٤٥ هـ / ٢٠٢٤ م'),
+            // Section 5: Publisher
+            buildInfoCard(
+              title: 'النَّاشِرُ',
+              icon: Icons.domain_rounded,
+              content: Column(
+                children: [
+                  Text(
+                    'مركز عبدالله بن مسعود لتحفيظ القرآن الكريم والدراسات الإسلامية',
+                    style: GoogleFonts.amiri(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'تَمِينْ نَيْئًا — كدونا، نيجيريا',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      color: subTextColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
 
-            divider(),
+            // Section 6: Edition & App Info
+            buildInfoCard(
+              title: 'الطَّبْعَةُ وَالتَّطْبِيقُ',
+              icon: Icons.info_outline_rounded,
+              content: Column(
+                children: [
+                  Text(
+                    'الطبعة الأولى (١٤٤٥ هـ / ٢٠٢٤ م)',
+                    style: GoogleFonts.amiri(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'تطبيق تحفة الولدان الإلكتروني • الإصدار ١.٠.٠',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12.5,
+                      color: subTextColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
 
-            // App info
-            sectionTitle('التطبيق'),
-            sectionBody('النسخة ١.٠.٠', fontSize: 14),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
           ],
         ),
       ),

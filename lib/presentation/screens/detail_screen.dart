@@ -445,6 +445,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           final isPart1 = hadith.id <= 40;
           final tagColor =
               isPart1 ? theme.colorScheme.primary : theme.colorScheme.secondary;
+          final isAudioPlayingThis =
+              audioState.isPlaying && audioState.currentHadithId == hadith.id;
 
           final audioHighlightBg = isDark
               ? const Color(0xFFD4AF37).withValues(alpha: 0.45)

@@ -14,6 +14,17 @@ void main() async {
   
   // Pre-initialize SharedPreferences for Riverpod synchronous override
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Ensure daily notification schedule is active if enabled
+  final isNotificationsEnabled =
+      sharedPreferences.getBool('notifications_enabled') ?? false;
+  if (isNotificationsEnabled) {
+    final hour = sharedPreferences.getInt('notification_hour') ?? 7;
+    final minute = sharedPreferences.getInt('notification_minute') ?? 0;
+    try {
+      await scheduleDailyNotification(hour: hour, minute: minute);
+    } catch (_) {}
+  }
   
   runApp(
     ProviderScope(

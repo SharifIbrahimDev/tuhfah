@@ -183,6 +183,34 @@ final notificationsEnabledProvider =
   return NotificationsNotifier(prefs);
 });
 
+// 10b. Notification Time Provider (Default 07:00 AM)
+class NotificationTimeNotifier extends StateNotifier<TimeOfDay> {
+  final SharedPreferences _prefs;
+  static const _hourKey = 'notification_hour';
+  static const _minuteKey = 'notification_minute';
+
+  NotificationTimeNotifier(this._prefs)
+      : super(const TimeOfDay(hour: 7, minute: 0)) {
+    final h = _prefs.getInt(_hourKey);
+    final m = _prefs.getInt(_minuteKey);
+    if (h != null && m != null) {
+      state = TimeOfDay(hour: h, minute: m);
+    }
+  }
+
+  Future<void> setTime(TimeOfDay time) async {
+    state = time;
+    await _prefs.setInt(_hourKey, time.hour);
+    await _prefs.setInt(_minuteKey, time.minute);
+  }
+}
+
+final notificationTimeProvider =
+    StateNotifierProvider<NotificationTimeNotifier, TimeOfDay>((ref) {
+  final prefs = ref.watch(sharedPrefsProvider);
+  return NotificationTimeNotifier(prefs);
+});
+
 // 11. Last Read Hadith Provider
 class LastReadNotifier extends StateNotifier<int?> {
   final SharedPreferences _prefs;
@@ -306,7 +334,7 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
         '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
 
     buffer.writeln('════════════════════════════════════');
-    buffer.writeln('📖 ملاحظات وتأملات من كتاب: تُحْفَةُ الوِلْدَانِ فِي الأَحَادِيثِ النَّبَوِيَّةِ');
+    buffer.writeln('📖 ملاحظات وتأملات من كتاب: تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ');
     buffer.writeln('✍️ تأليف: الأستاذ إبراهيم شريف أبوبكر');
     buffer.writeln('📅 تاريخ التصدير: $dateFormatted');
     buffer.writeln('🔢 إجمالي الملاحظات: ${state.length}');

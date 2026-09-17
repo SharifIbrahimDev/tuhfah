@@ -254,6 +254,23 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
     }
   }
 
+  String _formatCleanSource(HadithModel hadith) {
+    final src = hadith.source.trim();
+    final num = hadith.hadithNumber.trim();
+    if (num.isEmpty) return src;
+
+    if (src == 'رواه مسلم' && num.startsWith('مسلم:')) {
+      return 'رواه مسلم (${num.replaceFirst('مسلم:', '').trim()})';
+    }
+    if (src == 'رواه البخاري' && num.startsWith('البخاري:')) {
+      return 'رواه البخاري (${num.replaceFirst('البخاري:', '').trim()})';
+    }
+    if (src == 'متفق عليه') {
+      return 'متفق عليه ($num)';
+    }
+    return '$src ($num)';
+  }
+
   Widget _buildEmeraldGoldCard(HadithModel hadith) {
     const goldColor = Color(0xFFF3C766);
     const emeraldBg1 = Color(0xFF065A35);
@@ -377,14 +394,18 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
-                style: GoogleFonts.tajawal(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'مركز عبدالله بن مسعود لتحفيظ القرآن',
+                  style: GoogleFonts.tajawal(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -392,9 +413,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  hadith.hadithNumber.isNotEmpty
-                      ? '${hadith.source} (${hadith.hadithNumber})'
-                      : hadith.source,
+                  _formatCleanSource(hadith),
                   style: GoogleFonts.tajawal(
                     color: goldColor,
                     fontSize: 11,
@@ -527,14 +546,18 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
-                style: GoogleFonts.tajawal(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'مركز عبدالله بن مسعود لتحفيظ القرآن',
+                  style: GoogleFonts.tajawal(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -542,9 +565,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  hadith.hadithNumber.isNotEmpty
-                      ? '${hadith.source} (${hadith.hadithNumber})'
-                      : hadith.source,
+                  _formatCleanSource(hadith),
                   style: GoogleFonts.tajawal(
                     color: goldColor,
                     fontSize: 11,
@@ -674,14 +695,18 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'تأليف: الأستاذ إبراهيم شريف أبوبكر • مركز عبدالله بن مسعود',
-                style: GoogleFonts.tajawal(
-                  color: const Color(0xFF555E59),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'مركز عبدالله بن مسعود لتحفيظ القرآن',
+                  style: GoogleFonts.tajawal(
+                    color: const Color(0xFF555E59),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -689,9 +714,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  hadith.hadithNumber.isNotEmpty
-                      ? '${hadith.source} (${hadith.hadithNumber})'
-                      : hadith.source,
+                  _formatCleanSource(hadith),
                   style: GoogleFonts.tajawal(
                     color: greenBorder,
                     fontSize: 11,

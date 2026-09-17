@@ -15,8 +15,16 @@ class SettingsScreen extends ConsumerWidget {
     final fontSize = ref.watch(fontSizeProvider);
     final currentFontFamily = ref.watch(fontFamilyProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    final notificationTime = ref.watch(notificationTimeProvider);
     final audioState = ref.watch(audioPlayerProvider);
     final isLight = theme.brightness == Brightness.light;
+
+    String formatTimeArabic(TimeOfDay time) {
+      final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+      final minute = time.minute.toString().padLeft(2, '0');
+      final period = time.period == DayPeriod.am ? 'ص' : 'م';
+      return '$hour:$minute $period';
+    }
 
     final cardDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(20),
@@ -118,65 +126,216 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           Container(
             decoration: cardDecoration,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Switch.adaptive(
-                  value: notificationsEnabled,
-                  activeTrackColor: theme.colorScheme.primary,
-                  onChanged: (val) async {
-                    if (val) {
-                      final granted = await requestNotificationPermission();
-                      if (granted) {
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Switch.adaptive(
+                      value: notificationsEnabled,
+                      activeTrackColor: theme.colorScheme.primary,
+                      onChanged: (val) async {
+                        if (val) {
+                          final granted = await requestNotificationPermission();
+                          if (granted) {
+                            await ref
+                                .read(notificationsEnabledProvider.notifier)
+                                .setEnabled(true);
+                            await scheduleDailyNotification(
+                              hour: notificationTime.hour,
+                              minute: notificationTime.minute,
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'تم تفعيل التذكير اليومي بحديث الصباح (${formatTimeArabic(notificationTime)})',
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'يرجى السماح بإذن الإشعارات من إعدادات النظام للتطبيق',
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          await ref
+                              .read(notificationsEnabledProvider.notifier)
+                              .setEnabled(false);
+                          await cancelDailyNotification();
+                        }
+                      },
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'تذكير حديث اليوم',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            notificationsEnabled
+                                ? 'يصلك تنبيه يومياً في تمام الساعة (${formatTimeArabic(notificationTime)})'
+                                : 'تفعيل إشعار يومي يذكرك بحديث نبوي شريف',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              color:
+                                  isLight ? Colors.grey[600] : Colors.grey[400],
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.notifications_active_outlined,
+                        color: theme.colorScheme.primary),
+                  ],
+                ),
+                if (notificationsEnabled) ...[
+                  const Divider(height: 20),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: notificationTime,
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme:
+                                  Theme.of(context).colorScheme.copyWith(
+                                        primary: theme.colorScheme.primary,
+                                      ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
                         await ref
-                            .read(notificationsEnabledProvider.notifier)
-                            .setEnabled(true);
+                            .read(notificationTimeProvider.notifier)
+                            .setTime(picked);
                         await scheduleDailyNotification(
-                          title: 'تُحْفَةُ الوِلْدَانِ — حديث اليوم',
-                          body: 'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ»',
+                          hour: picked.hour,
+                          minute: picked.minute,
                         );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('تم تفعيل التذكير اليومي بحديث الصباح (7:00 ص)'),
+                            SnackBar(
+                              content: Text(
+                                'تم ضبط وقت التذكير اليومي على: ${formatTimeArabic(picked)}',
+                                textAlign: TextAlign.right,
+                              ),
                             ),
                           );
                         }
                       }
-                    } else {
-                      await ref
-                          .read(notificationsEnabledProvider.notifier)
-                          .setEnabled(false);
-                      await cancelDailyNotification();
-                    }
-                  },
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'تذكير حديث اليوم',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: theme.colorScheme.primary
+                                  .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit_outlined,
+                                    size: 14, color: theme.colorScheme.primary),
+                                const SizedBox(width: 6),
+                                Text(
+                                  formatTimeArabic(notificationTime),
+                                  style: GoogleFonts.tajawal(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'تغيير وقت التذكير',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.access_time_rounded,
+                              size: 20, color: theme.colorScheme.primary),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'إشعار يومي صباحاً (٧:٠٠ ص) بحديث نبوي شريف',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          color: isLight ? Colors.grey[600] : Colors.grey[400],
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Icon(Icons.notifications_active_outlined, color: theme.colorScheme.primary),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      await showTestNotification();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'تم إرسال إشعار تجريبي الآن — تحقق من شريط الإشعارات لديك',
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.touch_app_outlined,
+                              size: 16, color: theme.colorScheme.primary),
+                          const Spacer(),
+                          Text(
+                            'إرسال إشعار تجريبي للتأكد من وصوله',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13.5,
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.notifications_paused_outlined,
+                              size: 20, color: theme.colorScheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../data/models/hadith_model.dart';
 import '../../data/providers/hadith_provider.dart';
 import 'detail_screen.dart';
 
@@ -371,7 +370,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               );
             },
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (err, stack) => const SizedBox.shrink(),
           ),
 
           // Backup & Restore PopupMenu
