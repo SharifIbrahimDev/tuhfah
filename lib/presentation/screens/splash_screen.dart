@@ -181,7 +181,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             ),
                           ),
                           child: Text(
-                            'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                            'تأليف: إبراهيم شريف أبوبكر',
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

@@ -15,19 +15,50 @@ const String kNotificationChannelDescription =
     'تذكير يومي بحديث نبوي شريف من كتاب تحفة الولدان';
 const int kDailyNotificationId = 42;
 
-/// Initializes local notifications, discovers device timezone, and registers Android channel
-Future<void> initNotifications() async {
-  // Initialize timezone database
+/// Configures and synchronizes local device timezone with the timezone database
+Future<void> _configureLocalTimeZone() async {
   tz.initializeTimeZones();
 
-  // Set device local timezone
   try {
-    final tzInfo = await FlutterTimezone.getLocalTimezone();
-    final String currentTimeZone = tzInfo.identifier;
-    tz.setLocalLocation(tz.getLocation(currentTimeZone));
-  } catch (_) {
-    // If timezone lookup fails, default to UTC location gracefully
-  }
+    final dynamic tzResult = await FlutterTimezone.getLocalTimezone();
+    String? timeZoneName;
+
+    if (tzResult is String) {
+      timeZoneName = tzResult;
+    } else if (tzResult != null) {
+      try {
+        timeZoneName = (tzResult as dynamic).identifier?.toString() ?? tzResult.toString();
+      } catch (_) {
+        timeZoneName = tzResult.toString();
+      }
+    }
+
+    if (timeZoneName != null && timeZoneName.isNotEmpty) {
+      try {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+        return;
+      } catch (_) {
+        // Location not directly found by identifier; fall through to offset match
+      }
+    }
+  } catch (_) {}
+
+  // Fallback: match by UTC offset from device
+  try {
+    final offsetMs = DateTime.now().timeZoneOffset.inMilliseconds;
+    for (final loc in tz.timeZoneDatabase.locations.values) {
+      if (loc.currentTimeZone.offset == offsetMs) {
+        tz.setLocalLocation(loc);
+        return;
+      }
+    }
+    tz.setLocalLocation(tz.getLocation('UTC'));
+  } catch (_) {}
+}
+
+/// Initializes local notifications, discovers device timezone, and registers Android channel
+Future<void> initNotifications() async {
+  await _configureLocalTimeZone();
 
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const darwinInit = DarwinInitializationSettings(
@@ -75,7 +106,7 @@ Future<bool> requestNotificationPermission() async {
       final notifGranted = await android.requestNotificationsPermission();
       granted = notifGranted ?? false;
 
-      // Request exact alarms permission on Android 12+ (API 31+)
+      // Request exact alarms permission on Android 12+ (API 31+) if needed
       try {
         await android.requestExactAlarmsPermission();
       } catch (_) {}
@@ -104,6 +135,9 @@ Future<void> scheduleDailyNotification({
   String? title,
   String? body,
 }) async {
+  // Ensure timezone is up to date
+  await _configureLocalTimeZone();
+
   String notifTitle = title ?? 'تُحْفَةُ الوِلْدَانِ — حديث اليوم';
   String notifBody =
       body ?? 'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ»';
@@ -116,13 +150,17 @@ Future<void> scheduleDailyNotification({
     } catch (_) {}
   }
 
-  const androidDetails = AndroidNotificationDetails(
+  final androidDetails = AndroidNotificationDetails(
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
     importance: Importance.max,
     priority: Priority.high,
-    styleInformation: BigTextStyleInformation(''),
+    styleInformation: BigTextStyleInformation(
+      notifBody,
+      contentTitle: notifTitle,
+      summaryText: 'حديث اليوم',
+    ),
     category: AndroidNotificationCategory.reminder,
     visibility: NotificationVisibility.public,
     playSound: true,
@@ -135,7 +173,7 @@ Future<void> scheduleDailyNotification({
     presentSound: true,
   );
 
-  const notificationDetails = NotificationDetails(
+  final notificationDetails = NotificationDetails(
     android: androidDetails,
     iOS: darwinDetails,
     macOS: darwinDetails,
@@ -194,13 +232,21 @@ Future<void> cancelDailyNotification() async {
 
 /// Shows an immediate test notification to verify delivery and sound/vibration
 Future<void> showTestNotification({String? title, String? body}) async {
-  const androidDetails = AndroidNotificationDetails(
+  final testTitle = title ?? 'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار';
+  final testBody = body ??
+      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — يعمل التنبيه بنجاح!';
+
+  final androidDetails = AndroidNotificationDetails(
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
     importance: Importance.max,
     priority: Priority.high,
-    styleInformation: BigTextStyleInformation(''),
+    styleInformation: BigTextStyleInformation(
+      testBody,
+      contentTitle: testTitle,
+      summaryText: 'تجربة الإشعار',
+    ),
     playSound: true,
     enableVibration: true,
   );
@@ -209,15 +255,15 @@ Future<void> showTestNotification({String? title, String? body}) async {
     presentBadge: true,
     presentSound: true,
   );
-  const notificationDetails = NotificationDetails(
+  final notificationDetails = NotificationDetails(
     android: androidDetails,
     iOS: darwinDetails,
   );
 
   await flutterLocalNotificationsPlugin.show(
     0,
-    title ?? 'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار',
-    body ?? 'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — يعمل التنبيه بنجاح!',
+    testTitle,
+    testBody,
     notificationDetails,
   );
 }

@@ -78,7 +78,7 @@ class _TocScreenState extends ConsumerState<TocScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                            'تأليف: إبراهيم شريف أبوبكر',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

@@ -128,7 +128,7 @@ class AppDrawer extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    'تأليف: إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -298,7 +298,7 @@ class AppDrawer extends ConsumerWidget {
                     Share.share(
                       'تطبيق تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ\n'
                       'لطلاب ومدرسي حلقات تحفيظ القرآن الكريم.\n'
-                      'تأليف الأستاذ إبراهيم شريف أبوبكر — مركز عبدالله بن مسعود.',
+                      'تأليف إبراهيم شريف أبوبكر — مركز عبدالله بن مسعود.',
                     );
                   },
                 ),
@@ -312,7 +312,7 @@ class AppDrawer extends ConsumerWidget {
             child: Column(
               children: [
                 Text(
-                  'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                  'تأليف: إبراهيم شريف أبوبكر',
                   style: GoogleFonts.tajawal(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,

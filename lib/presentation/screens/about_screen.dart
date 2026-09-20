@@ -260,7 +260,7 @@ class AboutScreen extends StatelessWidget {
               content: Column(
                 children: [
                   Text(
-                    'الأستاذ إبراهيم شريف أبوبكر',
+                    'إبراهيم شريف أبوبكر',
                     style: GoogleFonts.amiri(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,

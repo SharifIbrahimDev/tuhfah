@@ -335,7 +335,7 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
 
     buffer.writeln('════════════════════════════════════');
     buffer.writeln('📖 ملاحظات وتأملات من كتاب: تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ');
-    buffer.writeln('✍️ تأليف: الأستاذ إبراهيم شريف أبوبكر');
+    buffer.writeln('✍️ تأليف: إبراهيم شريف أبوبكر');
     buffer.writeln('📅 تاريخ التصدير: $dateFormatted');
     buffer.writeln('🔢 إجمالي الملاحظات: ${state.length}');
     buffer.writeln('════════════════════════════════════\n');
@@ -376,7 +376,7 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
       buffer.writeln('────────────────────────────────────\n');
     }
 
-    buffer.writeln('✨ تم التصدير عبر تطبيق «تحفة الولدان» • تأليف: الأستاذ إبراهيم شريف أبوبكر');
+    buffer.writeln('✨ تم التصدير عبر تطبيق «تحفة الولدان» • تأليف: إبراهيم شريف أبوبكر');
     return buffer.toString();
   }
 
@@ -384,7 +384,7 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
     final list = state.values.map((n) => n.toJson()).toList();
     final backupData = {
       'app': 'Tuhfat Al-Wildan',
-      'author': 'الأستاذ إبراهيم شريف أبوبكر',
+      'author': 'إبراهيم شريف أبوبكر',
       'version': 1,
       'exportedAt': DateTime.now().toIso8601String(),
       'notesCount': list.length,

@@ -320,7 +320,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     ),
                   ),
                   child: Text(
-                    'من كتاب تحفة الولدان • تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    'من كتاب تحفة الولدان • تأليف: إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
                       fontSize: 11.5,
                       fontWeight: FontWeight.bold,

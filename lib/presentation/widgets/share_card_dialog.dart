@@ -56,7 +56,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
         await Share.shareXFiles(
           [XFile(file.path)],
           text:
-              '«${widget.hadith.title}»\n${widget.hadith.text}\n\nالمصدر: ${widget.hadith.source}\n— من كتاب تحفة الولدان\nتأليف: الأستاذ إبراهيم شريف أبوبكر',
+              '«${widget.hadith.title}»\n${widget.hadith.text}\n\nالمصدر: ${widget.hadith.source}\n— من كتاب تحفة الولدان\nتأليف: إبراهيم شريف أبوبكر',
         );
       }
     } catch (e) {
@@ -328,7 +328,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                     ],
                   ),
                   Text(
-                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    'تأليف: إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
                       color: goldColor,
                       fontSize: 9.5,
@@ -484,7 +484,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                     ],
                   ),
                   Text(
-                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    'تأليف: إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
                       color: goldColor,
                       fontSize: 9.5,
@@ -633,7 +633,7 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                     ],
                   ),
                   Text(
-                    'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                    'تأليف: إبراهيم شريف أبوبكر',
                     style: GoogleFonts.tajawal(
                       color: goldAccent,
                       fontSize: 9.5,

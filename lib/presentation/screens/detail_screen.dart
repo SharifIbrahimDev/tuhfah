@@ -387,7 +387,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     final hadith =
                         hadiths.firstWhere((h) => h.id == widget.hadithId);
                     final textToShare =
-                        '${hadith.title}\n\n${hadith.narrator}\n\n${hadith.text}\n\nالمصدر: ${hadith.source}${hadith.hadithNumber.isNotEmpty ? " (${hadith.hadithNumber})" : ""}\n\n— من كتاب تحفة الولدان (تأليف: الأستاذ إبراهيم شريف أبوبكر)';
+                        '${hadith.title}\n\n${hadith.narrator}\n\n${hadith.text}\n\nالمصدر: ${hadith.source}${hadith.hadithNumber.isNotEmpty ? " (${hadith.hadithNumber})" : ""}\n\n— من كتاب تحفة الولدان (تأليف: إبراهيم شريف أبوبكر)';
 
                     return Row(
                       mainAxisSize: MainAxisSize.min,
@@ -528,7 +528,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                'تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                                'تأليف: إبراهيم شريف أبوبكر',
                                 style: GoogleFonts.tajawal(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.bold,

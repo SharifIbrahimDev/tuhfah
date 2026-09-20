@@ -159,7 +159,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'تحفة الولدان • الأستاذ إبراهيم شريف أبوبكر',
+                  'تحفة الولدان • إبراهيم شريف أبوبكر',
                   textAlign: TextAlign.right,
                   style: GoogleFonts.tajawal(
                     fontSize: 11.5,
@@ -364,7 +364,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
                   Share.share(
                     formattedText,
-                    subject: 'ملاحظاتي من كتاب تحفة الولدان - الأستاذ إبراهيم شريف أبوبكر',
+                    subject: 'ملاحظاتي من كتاب تحفة الولدان - إبراهيم شريف أبوبكر',
                   );
                 },
               );
@@ -485,7 +485,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Text(
-                        'تحفة الولدان • تأليف: الأستاذ إبراهيم شريف أبوبكر',
+                        'تحفة الولدان • تأليف: إبراهيم شريف أبوبكر',
                         style: GoogleFonts.tajawal(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
