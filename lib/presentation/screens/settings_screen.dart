@@ -232,17 +232,25 @@ class SettingsScreen extends ConsumerWidget {
                         await ref
                             .read(notificationTimeProvider.notifier)
                             .setTime(picked);
-                        await scheduleDailyNotification(
+                        final scheduledDate = await scheduleDailyNotification(
                           hour: picked.hour,
                           minute: picked.minute,
                         );
                         if (context.mounted) {
+                          final now = DateTime.now();
+                          final diffMinutes = scheduledDate.difference(now).inMinutes;
+                          final isToday = scheduledDate.day == now.day;
+                          final timeStr = isToday
+                              ? 'اليوم بعد $diffMinutes دقيقة في تمام (${formatTimeArabic(picked)})'
+                              : 'غداً في تمام (${formatTimeArabic(picked)})';
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'تم ضبط وقت التذكير اليومي على: ${formatTimeArabic(picked)}',
+                                'تم ضبط التذكير: $timeStr',
                                 textAlign: TextAlign.right,
                               ),
+                              duration: const Duration(seconds: 4),
                             ),
                           );
                         }
@@ -297,6 +305,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
+                  // Option A: Instant Test Notification
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
@@ -305,7 +314,7 @@ class SettingsScreen extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                              'تم إرسال إشعار تجريبي الآن — تحقق من شريط الإشعارات لديك',
+                              'تم إرسال إشعار فوري الآن — تحقق من شريط الإشعارات لديك',
                               textAlign: TextAlign.right,
                             ),
                           ),
@@ -321,7 +330,7 @@ class SettingsScreen extends ConsumerWidget {
                               size: 16, color: theme.colorScheme.primary),
                           const Spacer(),
                           Text(
-                            'إرسال إشعار تجريبي للتأكد من وصوله',
+                            'إرسال إشعار فوري للتأكد من الصوت والعرض',
                             style: GoogleFonts.tajawal(
                               fontSize: 13.5,
                               color: theme.colorScheme.primary,
@@ -329,8 +338,49 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(Icons.notifications_paused_outlined,
+                          Icon(Icons.notifications_active_outlined,
                               size: 20, color: theme.colorScheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Option B: Scheduled Test Notification (60 seconds countdown)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      await scheduleTestCountdownNotification(seconds: 60);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '⏳ تمت جدولة إشعار اختباري ليصلك بعد ٦٠ ثانية بدقة — يمكنك إغلاق التطبيق أو قفل الشاشة للتجربة!',
+                              textAlign: TextAlign.right,
+                            ),
+                            duration: Duration(seconds: 5),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.timer_outlined,
+                              size: 16, color: theme.colorScheme.secondary),
+                          const Spacer(),
+                          Text(
+                            'تجربة إشعار مجدول بعد دقيقة واحدة (٦٠ ثانية)',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13.5,
+                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.alarm_on_rounded,
+                              size: 20, color: theme.colorScheme.secondary),
                         ],
                       ),
                     ),

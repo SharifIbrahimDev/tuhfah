@@ -129,7 +129,7 @@ Future<bool> requestNotificationPermission() async {
 }
 
 /// Schedules the daily hadith notification at the given hour and minute (local device time)
-Future<void> scheduleDailyNotification({
+Future<tz.TZDateTime> scheduleDailyNotification({
   int hour = 7,
   int minute = 0,
   String? title,
@@ -197,7 +197,7 @@ Future<void> scheduleDailyNotification({
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
 
-  // Attempt exact schedule first; fallback to inexact if OS restricts exact alarms
+  // Attempt AlarmClock first for 100% precision on Android, then exact, then inexact
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       kDailyNotificationId,
@@ -205,24 +205,117 @@ Future<void> scheduleDailyNotification({
       notifBody,
       scheduledDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   } catch (_) {
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        kDailyNotificationId,
+        notifTitle,
+        notifBody,
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (_) {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        kDailyNotificationId,
+        notifTitle,
+        notifBody,
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    }
+  }
+
+  return scheduledDate;
+}
+
+const int kTestScheduledNotificationId = 99;
+
+/// Schedules a test notification to trigger after a specific number of seconds (default: 60s)
+Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
+  await _configureLocalTimeZone();
+  final targetTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
+
+  final androidDetails = AndroidNotificationDetails(
+    kNotificationChannelId,
+    kNotificationChannelName,
+    channelDescription: kNotificationChannelDescription,
+    importance: Importance.max,
+    priority: Priority.high,
+    styleInformation: const BigTextStyleInformation(
+      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+      contentTitle: 'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
+      summaryText: 'تنبيه اختباري مجدول',
+    ),
+    category: AndroidNotificationCategory.reminder,
+    visibility: NotificationVisibility.public,
+    playSound: true,
+    enableVibration: true,
+  );
+
+  const darwinDetails = DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+  );
+
+  final notificationDetails = NotificationDetails(
+    android: androidDetails,
+    iOS: darwinDetails,
+  );
+
+  await flutterLocalNotificationsPlugin.cancel(kTestScheduledNotificationId);
+
+  try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      kDailyNotificationId,
-      notifTitle,
-      notifBody,
-      scheduledDate,
+      kTestScheduledNotificationId,
+      'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
+      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+      targetTime,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
     );
+  } catch (_) {
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        kTestScheduledNotificationId,
+        'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
+        'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+        targetTime,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (_) {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        kTestScheduledNotificationId,
+        'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
+        'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+        targetTime,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
+
+  return targetTime;
 }
 
 /// Cancels the daily scheduled notification
