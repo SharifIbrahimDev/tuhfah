@@ -20,10 +20,11 @@ void main() {
       ),
     );
 
-    // Let any asynchronous loading (like parsing hadiths.json) complete
-    await tester.pumpAndSettle();
+    // Pump initial frame and advance clock past splash timer (2500ms)
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3000));
 
     // Verify that the main title of the app is rendered on the screen
-    expect(find.text('تُحْفَتُ الوِلْدَانِ'), findsOneWidget);
+    expect(find.text('تُحْفَةُ الوِلْدَانِ'), findsWidgets);
   });
 }

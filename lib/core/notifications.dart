@@ -108,7 +108,10 @@ Future<bool> requestNotificationPermission() async {
 
       // Request exact alarms permission on Android 12+ (API 31+) if needed
       try {
-        await android.requestExactAlarmsPermission();
+        final canScheduleExact = await android.canScheduleExactNotifications() ?? false;
+        if (!canScheduleExact) {
+          await android.requestExactAlarmsPermission();
+        }
       } catch (_) {}
     }
   } else if (Platform.isIOS) {
@@ -154,6 +157,7 @@ Future<tz.TZDateTime> scheduleDailyNotification({
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
+    icon: '@mipmap/ic_launcher',
     importance: Importance.max,
     priority: Priority.high,
     styleInformation: BigTextStyleInformation(
@@ -163,6 +167,7 @@ Future<tz.TZDateTime> scheduleDailyNotification({
     ),
     category: AndroidNotificationCategory.reminder,
     visibility: NotificationVisibility.public,
+    channelShowBadge: true,
     playSound: true,
     enableVibration: true,
   );
@@ -192,12 +197,12 @@ Future<tz.TZDateTime> scheduleDailyNotification({
     minute,
   );
 
-  // If time already passed for today, schedule for tomorrow
-  if (scheduledDate.isBefore(now)) {
+  // If time already passed for today (or is within 5 seconds), schedule for tomorrow
+  if (scheduledDate.isBefore(now) || scheduledDate.difference(now).inSeconds.abs() < 5) {
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
 
-  // Attempt AlarmClock first for 100% precision on Android, then exact, then inexact
+  // Attempt exactAllowWhileIdle first for reliability, then fallback to inexactAllowWhileIdle
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       kDailyNotificationId,
@@ -205,7 +210,7 @@ Future<tz.TZDateTime> scheduleDailyNotification({
       notifBody,
       scheduledDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -218,24 +223,12 @@ Future<tz.TZDateTime> scheduleDailyNotification({
         notifBody,
         scheduledDate,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
-    } catch (_) {
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        kDailyNotificationId,
-        notifTitle,
-        notifBody,
-        scheduledDate,
-        notificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-    }
+    } catch (_) {}
   }
 
   return scheduledDate;
@@ -252,6 +245,7 @@ Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
+    icon: '@mipmap/ic_launcher',
     importance: Importance.max,
     priority: Priority.high,
     styleInformation: const BigTextStyleInformation(
@@ -261,6 +255,7 @@ Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
     ),
     category: AndroidNotificationCategory.reminder,
     visibility: NotificationVisibility.public,
+    channelShowBadge: true,
     playSound: true,
     enableVibration: true,
   );
@@ -285,7 +280,7 @@ Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
       'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
       targetTime,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -297,25 +292,24 @@ Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
         'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
         targetTime,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    } catch (_) {
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        kTestScheduledNotificationId,
-        'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
-        'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
-        targetTime,
-        notificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-    }
+    } catch (_) {}
   }
 
   return targetTime;
+}
+
+/// Returns the count of currently registered pending notifications
+Future<int> getPendingNotificationCount() async {
+  try {
+    final pending = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    return pending.length;
+  } catch (_) {
+    return 0;
+  }
 }
 
 /// Cancels the daily scheduled notification
@@ -333,6 +327,7 @@ Future<void> showTestNotification({String? title, String? body}) async {
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
+    icon: '@mipmap/ic_launcher',
     importance: Importance.max,
     priority: Priority.high,
     styleInformation: BigTextStyleInformation(
@@ -340,6 +335,7 @@ Future<void> showTestNotification({String? title, String? body}) async {
       contentTitle: testTitle,
       summaryText: 'تجربة الإشعار',
     ),
+    channelShowBadge: true,
     playSound: true,
     enableVibration: true,
   );

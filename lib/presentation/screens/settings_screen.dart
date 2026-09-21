@@ -345,7 +345,48 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // Option B: Scheduled Test Notification (60 seconds countdown)
+                  // Option B: Quick 10-second countdown test
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      await scheduleTestCountdownNotification(seconds: 10);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '⏳ تمت جدولة إشعار اختباري سريع ليصلك بعد ١٠ ثوانٍ — أغلق التطبيق أو اقفل الشاشة للتجربة!',
+                              textAlign: TextAlign.right,
+                            ),
+                            duration: Duration(seconds: 4),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.timer_10_rounded,
+                              size: 16, color: theme.colorScheme.secondary),
+                          const Spacer(),
+                          Text(
+                            'تجربة إشعار مجدول بعد ١٠ ثوانٍ (سريع)',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13.5,
+                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.alarm_on_rounded,
+                              size: 20, color: theme.colorScheme.secondary),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Option C: Scheduled Test Notification (60 seconds countdown)
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
@@ -381,6 +422,49 @@ class SettingsScreen extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Icon(Icons.alarm_on_rounded,
                               size: 20, color: theme.colorScheme.secondary),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Option D: Check Registered Pending Notifications
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final count = await getPendingNotificationCount();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              count > 0
+                                  ? '✅ يوجد $count تنبيه مجدول نشط في نظام الهاتف وجاهز للظهور في موعده'
+                                  : '⚠️ لا توجد تنبيهات مجدولة حالياً، قم بتفعيل التنبيه لإعادة جدولته',
+                              textAlign: TextAlign.right,
+                            ),
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.fact_check_outlined,
+                              size: 16, color: theme.colorScheme.primary),
+                          const Spacer(),
+                          Text(
+                            'التحقق من حالة التنبيهات المجدولة في النظام',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13,
+                              color: isLight ? Colors.grey[700] : Colors.grey[300],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.check_circle_outline_rounded,
+                              size: 18, color: theme.colorScheme.primary),
                         ],
                       ),
                     ),

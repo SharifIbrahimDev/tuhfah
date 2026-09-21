@@ -167,8 +167,8 @@ class NotificationsNotifier extends StateNotifier<bool> {
   final SharedPreferences _prefs;
   static const _key = 'notifications_enabled';
 
-  NotificationsNotifier(this._prefs) : super(false) {
-    state = _prefs.getBool(_key) ?? false;
+  NotificationsNotifier(this._prefs) : super(true) {
+    state = _prefs.getBool(_key) ?? true;
   }
 
   Future<void> setEnabled(bool enabled) async {

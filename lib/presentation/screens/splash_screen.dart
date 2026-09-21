@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/notifications.dart';
 import '../../data/models/hadith_model.dart';
 import '../../data/providers/hadith_provider.dart';
 import 'home_screen.dart';
@@ -23,6 +24,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    // Request notification permissions and register daily schedule if enabled
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final isNotificationsEnabled = ref.read(notificationsEnabledProvider);
+        if (isNotificationsEnabled) {
+          await requestNotificationPermission();
+          final time = ref.read(notificationTimeProvider);
+          await scheduleDailyNotification(hour: time.hour, minute: time.minute);
+        }
+      } catch (_) {}
+    });
 
     // Initialize premium animations
     _animationController = AnimationController(
