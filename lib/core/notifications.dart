@@ -9,41 +9,68 @@ import 'package:timezone/timezone.dart' as tz;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-const String kNotificationChannelId = 'daily_hadith_channel';
-const String kNotificationChannelName = 'حديث اليوم';
+const String kNotificationChannelId = 'daily_hadith_channel_v2';
+const String kNotificationChannelName = 'حديث اليوم (تنبيه دقيق)';
 const String kNotificationChannelDescription =
-    'تذكير يومي بحديث نبوي شريف من كتاب تحفة الولدان';
+    'تذكير يومي بحديث نبوي شريف من كتاب تحفة الولدان في موعده المحدد بدقة';
 const int kDailyNotificationId = 42;
+const int kTestScheduledNotificationId = 99;
+const int kTestTenSecondsNotificationId = 98;
+
+/// Model to return the result of a scheduling operation
+class ScheduleResult {
+  final bool success;
+  final tz.TZDateTime? scheduledDate;
+  final String? errorMessage;
+  final bool isExact;
+  final String scheduleMode;
+
+  const ScheduleResult({
+    required this.success,
+    this.scheduledDate,
+    this.errorMessage,
+    this.isExact = false,
+    this.scheduleMode = '',
+  });
+}
 
 /// Configures and synchronizes local device timezone with the timezone database
 Future<void> _configureLocalTimeZone() async {
   tz.initializeTimeZones();
 
+  String? timeZoneName;
   try {
     final dynamic tzResult = await FlutterTimezone.getLocalTimezone();
-    String? timeZoneName;
-
     if (tzResult is String) {
-      timeZoneName = tzResult;
+      timeZoneName = tzResult.trim();
     } else if (tzResult != null) {
       try {
-        timeZoneName = (tzResult as dynamic).identifier?.toString() ?? tzResult.toString();
+        timeZoneName = (tzResult as dynamic).identifier?.toString().trim() ??
+            tzResult.toString().trim();
       } catch (_) {
-        timeZoneName = tzResult.toString();
-      }
-    }
-
-    if (timeZoneName != null && timeZoneName.isNotEmpty) {
-      try {
-        tz.setLocalLocation(tz.getLocation(timeZoneName));
-        return;
-      } catch (_) {
-        // Location not directly found by identifier; fall through to offset match
+        timeZoneName = tzResult.toString().trim();
       }
     }
   } catch (_) {}
 
-  // Fallback: match by UTC offset from device
+  // 1. Try matching location by IANA identifier
+  if (timeZoneName != null && timeZoneName.isNotEmpty) {
+    try {
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      return;
+    } catch (_) {}
+
+    // Try sanitizing standard GMT/UTC strings
+    try {
+      final sanitized = timeZoneName
+          .replaceAll('GMT', 'Etc/GMT')
+          .replaceAll('UTC', 'Etc/GMT');
+      tz.setLocalLocation(tz.getLocation(sanitized));
+      return;
+    } catch (_) {}
+  }
+
+  // 2. Fallback: match by local device UTC offset
   try {
     final offsetMs = DateTime.now().timeZoneOffset.inMilliseconds;
     for (final loc in tz.timeZoneDatabase.locations.values) {
@@ -52,6 +79,10 @@ Future<void> _configureLocalTimeZone() async {
         return;
       }
     }
+  } catch (_) {}
+
+  // 3. Final Fallback: UTC
+  try {
     tz.setLocalLocation(tz.getLocation('UTC'));
   } catch (_) {}
 }
@@ -74,7 +105,7 @@ Future<void> initNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  // Pre-create notification channel with high priority on Android
+  // Pre-create high priority notification channel on Android
   if (Platform.isAndroid) {
     final androidPlugin = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -88,10 +119,41 @@ Future<void> initNotifications() async {
         playSound: true,
         enableVibration: true,
         showBadge: true,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
       );
       await androidPlugin.createNotificationChannel(androidChannel);
     }
   }
+}
+
+/// Checks if exact alarms are permitted on Android (API 31+)
+Future<bool> canScheduleExactAlarms() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    final android = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      final canExact = await android.canScheduleExactNotifications();
+      return canExact ?? false;
+    }
+  } catch (_) {}
+  return false;
+}
+
+/// Opens the system settings screen for exact alarms permission
+Future<bool> openExactAlarmSettings() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    final android = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      final result = await android.requestExactAlarmsPermission();
+      return result ?? false;
+    }
+  } catch (_) {}
+  return false;
 }
 
 /// Requests both notification permission and exact alarm permission where needed
@@ -106,7 +168,7 @@ Future<bool> requestNotificationPermission() async {
       final notifGranted = await android.requestNotificationsPermission();
       granted = notifGranted ?? false;
 
-      // Request exact alarms permission on Android 12+ (API 31+) if needed
+      // Check exact alarm permission
       try {
         final canScheduleExact = await android.canScheduleExactNotifications() ?? false;
         if (!canScheduleExact) {
@@ -131,14 +193,54 @@ Future<bool> requestNotificationPermission() async {
   return granted;
 }
 
+/// Returns NotificationDetails configured for maximum visibility, sound, and wake-lock
+NotificationDetails _buildNotificationDetails({
+  required String title,
+  required String body,
+  String summary = 'حديث اليوم',
+}) {
+  final androidDetails = AndroidNotificationDetails(
+    kNotificationChannelId,
+    kNotificationChannelName,
+    channelDescription: kNotificationChannelDescription,
+    icon: '@mipmap/ic_launcher',
+    importance: Importance.max,
+    priority: Priority.max,
+    styleInformation: BigTextStyleInformation(
+      body,
+      contentTitle: title,
+      summaryText: summary,
+    ),
+    category: AndroidNotificationCategory.alarm,
+    audioAttributesUsage: AudioAttributesUsage.alarm,
+    visibility: NotificationVisibility.public,
+    fullScreenIntent: true,
+    channelShowBadge: true,
+    playSound: true,
+    enableVibration: true,
+  );
+
+  const darwinDetails = DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+    interruptionLevel: InterruptionLevel.timeSensitive,
+  );
+
+  return NotificationDetails(
+    android: androidDetails,
+    iOS: darwinDetails,
+    macOS: darwinDetails,
+  );
+}
+
 /// Schedules the daily hadith notification at the given hour and minute (local device time)
-Future<tz.TZDateTime> scheduleDailyNotification({
+Future<ScheduleResult> scheduleDailyNotification({
   int hour = 7,
   int minute = 0,
   String? title,
   String? body,
 }) async {
-  // Ensure timezone is up to date
   await _configureLocalTimeZone();
 
   String notifTitle = title ?? 'تُحْفَةُ الوِلْدَانِ — حديث اليوم';
@@ -153,38 +255,13 @@ Future<tz.TZDateTime> scheduleDailyNotification({
     } catch (_) {}
   }
 
-  final androidDetails = AndroidNotificationDetails(
-    kNotificationChannelId,
-    kNotificationChannelName,
-    channelDescription: kNotificationChannelDescription,
-    icon: '@mipmap/ic_launcher',
-    importance: Importance.max,
-    priority: Priority.high,
-    styleInformation: BigTextStyleInformation(
-      notifBody,
-      contentTitle: notifTitle,
-      summaryText: 'حديث اليوم',
-    ),
-    category: AndroidNotificationCategory.reminder,
-    visibility: NotificationVisibility.public,
-    channelShowBadge: true,
-    playSound: true,
-    enableVibration: true,
+  final notificationDetails = _buildNotificationDetails(
+    title: notifTitle,
+    body: notifBody,
+    summary: 'حديث اليوم',
   );
 
-  const darwinDetails = DarwinNotificationDetails(
-    presentAlert: true,
-    presentBadge: true,
-    presentSound: true,
-  );
-
-  final notificationDetails = NotificationDetails(
-    android: androidDetails,
-    iOS: darwinDetails,
-    macOS: darwinDetails,
-  );
-
-  // Cancel existing scheduled notification before setting a new one
+  // Cancel any existing daily notification
   await flutterLocalNotificationsPlugin.cancel(kDailyNotificationId);
 
   final now = tz.TZDateTime.now(tz.local);
@@ -197,12 +274,12 @@ Future<tz.TZDateTime> scheduleDailyNotification({
     minute,
   );
 
-  // If time already passed for today (or is within 5 seconds), schedule for tomorrow
-  if (scheduledDate.isBefore(now) || scheduledDate.difference(now).inSeconds.abs() < 5) {
+  // If the time already passed today (or is within 5 seconds), schedule for tomorrow
+  if (scheduledDate.isBefore(now) || scheduledDate.difference(now).inSeconds <= 5) {
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
 
-  // Attempt exactAllowWhileIdle first for reliability, then fallback to inexactAllowWhileIdle
+  // Tier 1: Try alarmClock (true exact alarm)
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       kDailyNotificationId,
@@ -210,12 +287,19 @@ Future<tz.TZDateTime> scheduleDailyNotification({
       notifBody,
       scheduledDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
-  } catch (_) {
+    return ScheduleResult(
+      success: true,
+      scheduledDate: scheduledDate,
+      isExact: true,
+      scheduleMode: 'alarmClock',
+    );
+  } catch (e1) {
+    // Tier 2: Try exactAllowWhileIdle
     try {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         kDailyNotificationId,
@@ -223,93 +307,192 @@ Future<tz.TZDateTime> scheduleDailyNotification({
         notifBody,
         scheduledDate,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-    } catch (_) {}
+      return ScheduleResult(
+        success: true,
+        scheduledDate: scheduledDate,
+        isExact: true,
+        scheduleMode: 'exactAllowWhileIdle',
+      );
+    } catch (e2) {
+      // Tier 3: Try standard exact
+      try {
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          kDailyNotificationId,
+          notifTitle,
+          notifBody,
+          scheduledDate,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exact,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+        return ScheduleResult(
+          success: true,
+          scheduledDate: scheduledDate,
+          isExact: true,
+          scheduleMode: 'exact',
+        );
+      } catch (e3) {
+        // Tier 4: Fallback to inexactAllowWhileIdle
+        try {
+          await flutterLocalNotificationsPlugin.zonedSchedule(
+            kDailyNotificationId,
+            notifTitle,
+            notifBody,
+            scheduledDate,
+            notificationDetails,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+          );
+          return ScheduleResult(
+            success: true,
+            scheduledDate: scheduledDate,
+            isExact: false,
+            scheduleMode: 'inexactAllowWhileIdle',
+          );
+        } catch (e4) {
+          return ScheduleResult(
+            success: false,
+            errorMessage: e4.toString(),
+          );
+        }
+      }
+    }
   }
-
-  return scheduledDate;
 }
 
-const int kTestScheduledNotificationId = 99;
-
-/// Schedules a test notification to trigger after a specific number of seconds (default: 60s)
-Future<DateTime> scheduleTestCountdownNotification({int seconds = 60}) async {
+/// Schedules a test countdown notification with seconds precision
+Future<ScheduleResult> scheduleTestCountdownNotification({
+  int seconds = 60,
+  int notificationId = kTestScheduledNotificationId,
+}) async {
   await _configureLocalTimeZone();
-  final targetTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
 
-  final androidDetails = AndroidNotificationDetails(
-    kNotificationChannelId,
-    kNotificationChannelName,
-    channelDescription: kNotificationChannelDescription,
-    icon: '@mipmap/ic_launcher',
-    importance: Importance.max,
-    priority: Priority.high,
-    styleInformation: const BigTextStyleInformation(
-      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
-      contentTitle: 'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
-      summaryText: 'تنبيه اختباري مجدول',
-    ),
-    category: AndroidNotificationCategory.reminder,
-    visibility: NotificationVisibility.public,
-    channelShowBadge: true,
-    playSound: true,
-    enableVibration: true,
+  // Create target date safely derived from device DateTime.now()
+  final targetDateTime = DateTime.now().add(Duration(seconds: seconds));
+  final targetTime = tz.TZDateTime.from(targetDateTime, tz.local);
+
+  final title = seconds == 10
+      ? 'تُحْفَةُ الوِلْدَانِ — اختبار التنبيه (١٠ ثوانٍ)'
+      : 'تُحْفَةُ الوِلْدَانِ — اختبار التنبيه (٦٠ ثانية)';
+  const body =
+      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!';
+
+  final notificationDetails = _buildNotificationDetails(
+    title: title,
+    body: body,
+    summary: 'تنبيه اختباري مجدول',
   );
 
-  const darwinDetails = DarwinNotificationDetails(
-    presentAlert: true,
-    presentBadge: true,
-    presentSound: true,
-  );
+  await flutterLocalNotificationsPlugin.cancel(notificationId);
 
-  final notificationDetails = NotificationDetails(
-    android: androidDetails,
-    iOS: darwinDetails,
-  );
-
-  await flutterLocalNotificationsPlugin.cancel(kTestScheduledNotificationId);
-
+  // Tier 1: alarmClock (highest priority Android alarm)
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      kTestScheduledNotificationId,
-      'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
-      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+      notificationId,
+      title,
+      body,
       targetTime,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
-  } catch (_) {
+    return ScheduleResult(
+      success: true,
+      scheduledDate: targetTime,
+      isExact: true,
+      scheduleMode: 'alarmClock',
+    );
+  } catch (e1) {
+    // Tier 2: exactAllowWhileIdle
     try {
       await flutterLocalNotificationsPlugin.zonedSchedule(
-        kTestScheduledNotificationId,
-        'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار المجدول',
-        'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!',
+        notificationId,
+        title,
+        body,
         targetTime,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-    } catch (_) {}
+      return ScheduleResult(
+        success: true,
+        scheduledDate: targetTime,
+        isExact: true,
+        scheduleMode: 'exactAllowWhileIdle',
+      );
+    } catch (e2) {
+      // Tier 3: exact
+      try {
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          targetTime,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exact,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+        return ScheduleResult(
+          success: true,
+          scheduledDate: targetTime,
+          isExact: true,
+          scheduleMode: 'exact',
+        );
+      } catch (e3) {
+        // Tier 4: inexact fallback
+        try {
+          await flutterLocalNotificationsPlugin.zonedSchedule(
+            notificationId,
+            title,
+            body,
+            targetTime,
+            notificationDetails,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          return ScheduleResult(
+            success: true,
+            scheduledDate: targetTime,
+            isExact: false,
+            scheduleMode: 'inexactAllowWhileIdle',
+          );
+        } catch (e4) {
+          return ScheduleResult(
+            success: false,
+            errorMessage: e4.toString(),
+          );
+        }
+      }
+    }
   }
+}
 
-  return targetTime;
+/// Returns list of all currently registered pending notifications
+Future<List<PendingNotificationRequest>> getPendingNotificationRequests() async {
+  try {
+    return await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+  } catch (_) {
+    return [];
+  }
 }
 
 /// Returns the count of currently registered pending notifications
 Future<int> getPendingNotificationCount() async {
-  try {
-    final pending = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    return pending.length;
-  } catch (_) {
-    return 0;
-  }
+  final list = await getPendingNotificationRequests();
+  return list.length;
 }
 
 /// Cancels the daily scheduled notification
@@ -323,30 +506,10 @@ Future<void> showTestNotification({String? title, String? body}) async {
   final testBody = body ??
       'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — يعمل التنبيه بنجاح!';
 
-  final androidDetails = AndroidNotificationDetails(
-    kNotificationChannelId,
-    kNotificationChannelName,
-    channelDescription: kNotificationChannelDescription,
-    icon: '@mipmap/ic_launcher',
-    importance: Importance.max,
-    priority: Priority.high,
-    styleInformation: BigTextStyleInformation(
-      testBody,
-      contentTitle: testTitle,
-      summaryText: 'تجربة الإشعار',
-    ),
-    channelShowBadge: true,
-    playSound: true,
-    enableVibration: true,
-  );
-  const darwinDetails = DarwinNotificationDetails(
-    presentAlert: true,
-    presentBadge: true,
-    presentSound: true,
-  );
-  final notificationDetails = NotificationDetails(
-    android: androidDetails,
-    iOS: darwinDetails,
+  final notificationDetails = _buildNotificationDetails(
+    title: testTitle,
+    body: testBody,
+    summary: 'تجربة الإشعار الفوري',
   );
 
   await flutterLocalNotificationsPlugin.show(

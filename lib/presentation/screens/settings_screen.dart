@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,11 +6,259 @@ import '../../core/notifications.dart';
 import '../../data/providers/hadith_provider.dart';
 import 'about_screen.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with WidgetsBindingObserver {
+  bool _canExactAlarms = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkExactAlarmStatus();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkExactAlarmStatus();
+    }
+  }
+
+  Future<void> _checkExactAlarmStatus() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final canExact = await canScheduleExactAlarms();
+      if (mounted) {
+        setState(() {
+          _canExactAlarms = canExact;
+        });
+      }
+    } catch (_) {}
+  }
+
+  String _formatTimeArabic(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'ص' : 'م';
+    return '$hour:$minute $period';
+  }
+
+  Future<void> _promptExactAlarmPermission(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'تفعيل التنبيهات الدقيقة',
+              style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.alarm_on_rounded, color: Color(0xFFC5A880)),
+          ],
+        ),
+        content: Text(
+          'لكي يعمل تنبيه حديث اليوم والتجارب الزمنية في موعدها الدقيق تماماً حتى أثناء قفل الشاشة أو سكون الهاتف، يلزم تفعيل إذن «التنبيهات والمواعيد» (Alarms & Reminders) للتطبيق في نظام أندرويد.\n\nاضغط «تفعيل الإذن الآن» لفتح صفحة الإعدادات وتفعيل الخيار.',
+          textAlign: TextAlign.right,
+          style: GoogleFonts.tajawal(fontSize: 14, height: 1.6),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('لاحقاً', style: GoogleFonts.tajawal()),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await openExactAlarmSettings();
+            },
+            child: Text('تفعيل الإذن الآن',
+                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPendingStatusSheet() async {
+    final pending = await getPendingNotificationRequests();
+    final canExact = await canScheduleExactAlarms();
+    if (!mounted) return;
+
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isLight ? Colors.white : const Color(0xFF16211E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+                Text(
+                  'حالة التنبيهات في نظام الهاتف',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            // Permission status chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: canExact
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: canExact
+                      ? Colors.green.withValues(alpha: 0.3)
+                      : Colors.orange.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  if (!canExact)
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        await openExactAlarmSettings();
+                      },
+                      child: Text('منح الإذن',
+                          style:
+                              GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+                    ),
+                  const Spacer(),
+                  Text(
+                    canExact
+                        ? 'إذن التنبيهات الدقيقة: مفعّل ✅'
+                        : 'إذن التنبيهات الدقيقة: غير مفعّل ⚠️',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: canExact ? Colors.green[800] : Colors.orange[900],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (pending.isEmpty) ...[
+              Text(
+                '⚠️ لا توجد أي تنبيهات مسجلة حالياً في النظام.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'يمكنك النقر على الزر أدناه لإعادة جدولة منبه حديث اليوم في موعده فوراً.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                    fontSize: 12,
+                    color: isLight ? Colors.grey[600] : Colors.grey[400]),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  final time = ref.read(notificationTimeProvider);
+                  final res = await scheduleDailyNotification(
+                    hour: time.hour,
+                    minute: time.minute,
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          res.success
+                              ? '✅ تمت إعادة جدولة منبه حديث اليوم بنجاح (${_formatTimeArabic(time)})'
+                              : '❌ تعذر الجدولة: ${res.errorMessage}',
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    );
+                  }
+                  _checkExactAlarmStatus();
+                },
+                icon: const Icon(Icons.alarm_add_rounded),
+                label: Text('إعادة جدولة التنبيه اليومي الآن',
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+              ),
+            ] else ...[
+              Text(
+                'عدد التنبيهات المجدولة النشطة: ${pending.length}',
+                textAlign: TextAlign.right,
+                style: GoogleFonts.tajawal(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ...pending.map((p) => ListTile(
+                    dense: true,
+                    leading:
+                        Icon(Icons.alarm, color: theme.colorScheme.primary),
+                    title: Text(p.title ?? 'تنبيه',
+                        textAlign: TextAlign.right,
+                        style:
+                            GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+                    subtitle: Text(p.body ?? '',
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  )),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentThemeMode = ref.watch(themeModeProvider);
     final fontSize = ref.watch(fontSizeProvider);
@@ -18,13 +267,6 @@ class SettingsScreen extends ConsumerWidget {
     final notificationTime = ref.watch(notificationTimeProvider);
     final audioState = ref.watch(audioPlayerProvider);
     final isLight = theme.brightness == Brightness.light;
-
-    String formatTimeArabic(TimeOfDay time) {
-      final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-      final minute = time.minute.toString().padLeft(2, '0');
-      final period = time.period == DayPeriod.am ? 'ص' : 'م';
-      return '$hour:$minute $period';
-    }
 
     final cardDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(20),
@@ -138,20 +380,24 @@ class SettingsScreen extends ConsumerWidget {
                       activeTrackColor: theme.colorScheme.primary,
                       onChanged: (val) async {
                         if (val) {
-                          final granted = await requestNotificationPermission();
+                          final granted =
+                              await requestNotificationPermission();
                           if (granted) {
                             await ref
                                 .read(notificationsEnabledProvider.notifier)
                                 .setEnabled(true);
-                            await scheduleDailyNotification(
+                            final res = await scheduleDailyNotification(
                               hour: notificationTime.hour,
                               minute: notificationTime.minute,
                             );
+                            _checkExactAlarmStatus();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'تم تفعيل التذكير اليومي بحديث الصباح (${formatTimeArabic(notificationTime)})',
+                                    res.success
+                                        ? 'تم تفعيل التذكير اليومي بحديث الصباح (${_formatTimeArabic(notificationTime)})'
+                                        : 'تعذر جدولة التنبيه: ${res.errorMessage}',
                                     textAlign: TextAlign.right,
                                   ),
                                 ),
@@ -191,7 +437,7 @@ class SettingsScreen extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             notificationsEnabled
-                                ? 'يصلك تنبيه يومياً في تمام الساعة (${formatTimeArabic(notificationTime)})'
+                                ? 'يصلك تنبيه يومياً في تمام الساعة (${_formatTimeArabic(notificationTime)})'
                                 : 'تفعيل إشعار يومي يذكرك بحديث نبوي شريف',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
@@ -208,6 +454,62 @@ class SettingsScreen extends ConsumerWidget {
                         color: theme.colorScheme.primary),
                   ],
                 ),
+
+                // Warning Card if Exact Alarms Permission is missing on Android
+                if (notificationsEnabled &&
+                    Platform.isAndroid &&
+                    !_canExactAlarms) ...[
+                  const SizedBox(height: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _promptExactAlarmPermission(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF3CD),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFFEEBA)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 14, color: Color(0xFF856404)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'تنبيه: يلزم تفعيل إذن التنبيهات والمواعيد',
+                                  style: GoogleFonts.tajawal(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.5,
+                                    color: const Color(0xFF856404),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'انقر هنا لتفعيل الإذن لضمان رنين المنبه بدقة في وقته المحدد',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 11.5,
+                                    color: const Color(0xFF856404),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.warning_amber_rounded,
+                              color: Color(0xFF856404), size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
                 if (notificationsEnabled) ...[
                   const Divider(height: 20),
                   InkWell(
@@ -232,17 +534,19 @@ class SettingsScreen extends ConsumerWidget {
                         await ref
                             .read(notificationTimeProvider.notifier)
                             .setTime(picked);
-                        final scheduledDate = await scheduleDailyNotification(
+                        final res = await scheduleDailyNotification(
                           hour: picked.hour,
                           minute: picked.minute,
                         );
-                        if (context.mounted) {
+                        _checkExactAlarmStatus();
+                        if (context.mounted && res.scheduledDate != null) {
                           final now = DateTime.now();
-                          final diffMinutes = scheduledDate.difference(now).inMinutes;
-                          final isToday = scheduledDate.day == now.day;
+                          final diffMinutes =
+                              res.scheduledDate!.difference(now).inMinutes;
+                          final isToday = res.scheduledDate!.day == now.day;
                           final timeStr = isToday
-                              ? 'اليوم بعد $diffMinutes دقيقة في تمام (${formatTimeArabic(picked)})'
-                              : 'غداً في تمام (${formatTimeArabic(picked)})';
+                              ? 'اليوم بعد $diffMinutes دقيقة في تمام (${_formatTimeArabic(picked)})'
+                              : 'غداً في تمام (${_formatTimeArabic(picked)})';
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -270,16 +574,17 @@ class SettingsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: theme.colorScheme.primary
-                                  .withValues(alpha: 0.3),
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
                               children: [
                                 Icon(Icons.edit_outlined,
-                                    size: 14, color: theme.colorScheme.primary),
+                                    size: 14,
+                                    color: theme.colorScheme.primary),
                                 const SizedBox(width: 6),
                                 Text(
-                                  formatTimeArabic(notificationTime),
+                                  _formatTimeArabic(notificationTime),
                                   style: GoogleFonts.tajawal(
                                     fontWeight: FontWeight.bold,
                                     color: theme.colorScheme.primary,
@@ -349,15 +654,23 @@ class SettingsScreen extends ConsumerWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
-                      await scheduleTestCountdownNotification(seconds: 10);
+                      if (!_canExactAlarms && Platform.isAndroid) {
+                        await _promptExactAlarmPermission(context);
+                      }
+                      final res = await scheduleTestCountdownNotification(
+                        seconds: 10,
+                        notificationId: kTestTenSecondsNotificationId,
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              '⏳ تمت جدولة إشعار اختباري سريع ليصلك بعد ١٠ ثوانٍ — أغلق التطبيق أو اقفل الشاشة للتجربة!',
+                              res.success
+                                  ? '⏳ تمت جدولة إشعار بعد ١٠ ثوانٍ بدقة (${res.scheduleMode}) — أقفل الشاشة للتجربة!'
+                                  : '⚠️ تعذر الجدولة: ${res.errorMessage}',
                               textAlign: TextAlign.right,
                             ),
-                            duration: Duration(seconds: 4),
+                            duration: const Duration(seconds: 5),
                           ),
                         );
                       }
@@ -390,15 +703,23 @@ class SettingsScreen extends ConsumerWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
-                      await scheduleTestCountdownNotification(seconds: 60);
+                      if (!_canExactAlarms && Platform.isAndroid) {
+                        await _promptExactAlarmPermission(context);
+                      }
+                      final res = await scheduleTestCountdownNotification(
+                        seconds: 60,
+                        notificationId: kTestScheduledNotificationId,
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              '⏳ تمت جدولة إشعار اختباري ليصلك بعد ٦٠ ثانية بدقة — يمكنك إغلاق التطبيق أو قفل الشاشة للتجربة!',
+                              res.success
+                                  ? '⏳ تمت جدولة إشعار بعد ٦٠ ثانية بدقة (${res.scheduleMode}) — يمكنك قفل الشاشة للتجربة!'
+                                  : '⚠️ تعذر الجدولة: ${res.errorMessage}',
                               textAlign: TextAlign.right,
                             ),
-                            duration: Duration(seconds: 5),
+                            duration: const Duration(seconds: 5),
                           ),
                         );
                       }
@@ -427,25 +748,10 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // Option D: Check Registered Pending Notifications
+                  // Option D: Check Registered Pending Notifications with Full Diagnosis
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      final count = await getPendingNotificationCount();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              count > 0
-                                  ? '✅ يوجد $count تنبيه مجدول نشط في نظام الهاتف وجاهز للظهور في موعده'
-                                  : '⚠️ لا توجد تنبيهات مجدولة حالياً، قم بتفعيل التنبيه لإعادة جدولته',
-                              textAlign: TextAlign.right,
-                            ),
-                            duration: const Duration(seconds: 4),
-                          ),
-                        );
-                      }
-                    },
+                    onTap: _showPendingStatusSheet,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 4.0, vertical: 8.0),
@@ -458,7 +764,9 @@ class SettingsScreen extends ConsumerWidget {
                             'التحقق من حالة التنبيهات المجدولة في النظام',
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
-                              color: isLight ? Colors.grey[700] : Colors.grey[300],
+                              color: isLight
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -557,7 +865,8 @@ class SettingsScreen extends ConsumerWidget {
                         color: theme.colorScheme.primary,
                       ),
                     ),
-                    Text('حجم الخط الحالي', style: GoogleFonts.tajawal(fontSize: 14)),
+                    Text('حجم الخط الحالي',
+                        style: GoogleFonts.tajawal(fontSize: 14)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -567,7 +876,8 @@ class SettingsScreen extends ConsumerWidget {
                   max: 36.0,
                   divisions: 10,
                   activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  inactiveColor:
+                      theme.colorScheme.primary.withValues(alpha: 0.2),
                   onChanged: (val) {
                     ref.read(fontSizeProvider.notifier).setFontSize(val);
                   },
@@ -578,7 +888,9 @@ class SettingsScreen extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isLight ? const Color(0xFFFAF7F0) : const Color(0xFF131D1A),
+                    color: isLight
+                        ? const Color(0xFFFAF7F0)
+                        : const Color(0xFF131D1A),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: theme.colorScheme.primary.withValues(alpha: 0.2),
@@ -615,41 +927,36 @@ class SettingsScreen extends ConsumerWidget {
                 _SpeedOptionTile(
                   title: 'بطيء جداً (٠٫٣٠×) — مناسب للتحفيظ والتكرار',
                   isSelected: audioState.playbackRate == 0.30,
-                  onTap: () => ref
-                      .read(audioPlayerProvider.notifier)
-                      .setRate(0.30),
+                  onTap: () =>
+                      ref.read(audioPlayerProvider.notifier).setRate(0.30),
                   activeColor: theme.colorScheme.primary,
                 ),
                 _SpeedOptionTile(
                   title: 'بطيء ومرتل (٠٫٤٠×)',
                   isSelected: audioState.playbackRate == 0.40,
-                  onTap: () => ref
-                      .read(audioPlayerProvider.notifier)
-                      .setRate(0.40),
+                  onTap: () =>
+                      ref.read(audioPlayerProvider.notifier).setRate(0.40),
                   activeColor: theme.colorScheme.primary,
                 ),
                 _SpeedOptionTile(
                   title: 'هادئ ومتأنٍ (٠٫٤٥×) — الافتراضي الموصى به',
                   isSelected: audioState.playbackRate == 0.45,
-                  onTap: () => ref
-                      .read(audioPlayerProvider.notifier)
-                      .setRate(0.45),
+                  onTap: () =>
+                      ref.read(audioPlayerProvider.notifier).setRate(0.45),
                   activeColor: theme.colorScheme.primary,
                 ),
                 _SpeedOptionTile(
                   title: 'معتدل (٠٫٥٥×)',
                   isSelected: audioState.playbackRate == 0.55,
-                  onTap: () => ref
-                      .read(audioPlayerProvider.notifier)
-                      .setRate(0.55),
+                  onTap: () =>
+                      ref.read(audioPlayerProvider.notifier).setRate(0.55),
                   activeColor: theme.colorScheme.primary,
                 ),
                 _SpeedOptionTile(
                   title: 'سريع (٠٫٧٠×)',
                   isSelected: audioState.playbackRate == 0.70,
-                  onTap: () => ref
-                      .read(audioPlayerProvider.notifier)
-                      .setRate(0.70),
+                  onTap: () =>
+                      ref.read(audioPlayerProvider.notifier).setRate(0.70),
                   activeColor: theme.colorScheme.primary,
                 ),
               ],
@@ -733,12 +1040,15 @@ class SettingsScreen extends ConsumerWidget {
                   MaterialPageRoute(builder: (_) => const AboutScreen()),
                 );
               },
-              leading: Icon(Icons.chevron_left, color: theme.colorScheme.primary),
-              trailing: Icon(Icons.info_outline, color: theme.colorScheme.primary),
+              leading:
+                  Icon(Icons.chevron_left, color: theme.colorScheme.primary),
+              trailing:
+                  Icon(Icons.info_outline, color: theme.colorScheme.primary),
               title: Text(
                 'عن الكتاب والناشر',
                 textAlign: TextAlign.right,
-                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 15),
+                style: GoogleFonts.tajawal(
+                    fontWeight: FontWeight.bold, fontSize: 15),
               ),
               subtitle: Text(
                 'المؤلف، التقديم، المراجعون، والناشر',
@@ -835,7 +1145,8 @@ class _ThemeOptionTile extends StatelessWidget {
             if (isSelected)
               Icon(Icons.check_circle, color: activeColor, size: 20)
             else
-              Icon(Icons.circle_outlined, color: Colors.grey.withValues(alpha: 0.5), size: 20),
+              Icon(Icons.circle_outlined,
+                  color: Colors.grey.withValues(alpha: 0.5), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -887,7 +1198,8 @@ class _FontOptionTile extends StatelessWidget {
             if (isSelected)
               Icon(Icons.check_circle, color: activeColor, size: 20)
             else
-              Icon(Icons.circle_outlined, color: Colors.grey.withValues(alpha: 0.4), size: 20),
+              Icon(Icons.circle_outlined,
+                  color: Colors.grey.withValues(alpha: 0.4), size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -897,7 +1209,8 @@ class _FontOptionTile extends StatelessWidget {
                     fontName,
                     style: GoogleFonts.tajawal(
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(height: 2),
