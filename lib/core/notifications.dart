@@ -233,6 +233,23 @@ NotificationDetails _buildNotificationDetails({
   );
 }
 
+/// Computes the exact next occurrence of the daily notification
+tz.TZDateTime getNextDailyNotificationDateTime(int hour, int minute) {
+  final now = tz.TZDateTime.now(tz.local);
+  var scheduledDate = tz.TZDateTime(
+    tz.local,
+    now.year,
+    now.month,
+    now.day,
+    hour,
+    minute,
+  );
+  if (scheduledDate.isBefore(now) || scheduledDate.difference(now).inSeconds <= 5) {
+    scheduledDate = scheduledDate.add(const Duration(days: 1));
+  }
+  return scheduledDate;
+}
+
 /// Schedules the daily hadith notification at the given hour and minute (local device time)
 Future<ScheduleResult> scheduleDailyNotification({
   int hour = 7,

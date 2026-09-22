@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/notifications.dart';
 import '../../data/providers/hadith_provider.dart';
+import '../widgets/notification_live_monitor_card.dart';
 import 'about_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -609,7 +610,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
+
+                  // Real-time Live Countdown & Monitor Card
+                  NotificationLiveMonitorCard(
+                    isDailyEnabled: notificationsEnabled,
+                    dailyTime: notificationTime,
+                    canExactAlarms: _canExactAlarms,
+                    onRefreshStatus: _checkExactAlarmStatus,
+                    onOpenExactSettings: () => _promptExactAlarmPermission(context),
+                  ),
+
+                  const SizedBox(height: 4),
+
                   // Option A: Instant Test Notification
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
@@ -637,118 +650,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           Text(
                             'إرسال إشعار فوري للتأكد من الصوت والعرض',
                             style: GoogleFonts.tajawal(
-                              fontSize: 13.5,
+                              fontSize: 13,
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Icon(Icons.notifications_active_outlined,
-                              size: 20, color: theme.colorScheme.primary),
+                              size: 18, color: theme.colorScheme.primary),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  // Option B: Quick 10-second countdown test
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      if (!_canExactAlarms && Platform.isAndroid) {
-                        await _promptExactAlarmPermission(context);
-                      }
-                      final res = await scheduleTestCountdownNotification(
-                        seconds: 10,
-                        notificationId: kTestTenSecondsNotificationId,
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              res.success
-                                  ? '⏳ تمت جدولة إشعار بعد ١٠ ثوانٍ بدقة (${res.scheduleMode}) — أقفل الشاشة للتجربة!'
-                                  : '⚠️ تعذر الجدولة: ${res.errorMessage}',
-                              textAlign: TextAlign.right,
-                            ),
-                            duration: const Duration(seconds: 5),
-                          ),
-                        );
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4.0, vertical: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.timer_10_rounded,
-                              size: 16, color: theme.colorScheme.secondary),
-                          const Spacer(),
-                          Text(
-                            'تجربة إشعار مجدول بعد ١٠ ثوانٍ (سريع)',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13.5,
-                              color: theme.colorScheme.secondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.alarm_on_rounded,
-                              size: 20, color: theme.colorScheme.secondary),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Option C: Scheduled Test Notification (60 seconds countdown)
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      if (!_canExactAlarms && Platform.isAndroid) {
-                        await _promptExactAlarmPermission(context);
-                      }
-                      final res = await scheduleTestCountdownNotification(
-                        seconds: 60,
-                        notificationId: kTestScheduledNotificationId,
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              res.success
-                                  ? '⏳ تمت جدولة إشعار بعد ٦٠ ثانية بدقة (${res.scheduleMode}) — يمكنك قفل الشاشة للتجربة!'
-                                  : '⚠️ تعذر الجدولة: ${res.errorMessage}',
-                              textAlign: TextAlign.right,
-                            ),
-                            duration: const Duration(seconds: 5),
-                          ),
-                        );
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4.0, vertical: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.timer_outlined,
-                              size: 16, color: theme.colorScheme.secondary),
-                          const Spacer(),
-                          Text(
-                            'تجربة إشعار مجدول بعد دقيقة واحدة (٦٠ ثانية)',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13.5,
-                              color: theme.colorScheme.secondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.alarm_on_rounded,
-                              size: 20, color: theme.colorScheme.secondary),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Option D: Check Registered Pending Notifications with Full Diagnosis
+
+                  const SizedBox(height: 4),
+
+                  // Option B: Diagnostic sheet for all pending requests
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: _showPendingStatusSheet,
@@ -761,7 +678,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               size: 16, color: theme.colorScheme.primary),
                           const Spacer(),
                           Text(
-                            'التحقق من حالة التنبيهات المجدولة في النظام',
+                            'التقرير التشخيصي المفصل للتنبيهات',
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
                               color: isLight
