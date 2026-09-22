@@ -91,7 +91,7 @@ Future<void> _configureLocalTimeZone() async {
 Future<void> initNotifications() async {
   await _configureLocalTimeZone();
 
-  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const androidInit = AndroidInitializationSettings('ic_launcher');
   const darwinInit = DarwinInitializationSettings(
     requestAlertPermission: true,
     requestBadgePermission: true,
@@ -205,6 +205,7 @@ NotificationDetails _buildNotificationDetails({
     channelDescription: kNotificationChannelDescription,
     importance: Importance.max,
     priority: Priority.max,
+    icon: 'ic_stat_hadith',
     styleInformation: BigTextStyleInformation(
       body,
       contentTitle: title,
