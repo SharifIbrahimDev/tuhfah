@@ -203,7 +203,6 @@ NotificationDetails _buildNotificationDetails({
     kNotificationChannelId,
     kNotificationChannelName,
     channelDescription: kNotificationChannelDescription,
-    icon: '@mipmap/ic_launcher',
     importance: Importance.max,
     priority: Priority.max,
     styleInformation: BigTextStyleInformation(
