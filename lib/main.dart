@@ -10,22 +10,27 @@ import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initNotifications();
-  
-  // Pre-initialize SharedPreferences for Riverpod synchronous override
+
+  // Pre-initialize SharedPreferences safely for Riverpod override
   final sharedPreferences = await SharedPreferences.getInstance();
 
+  // Pre-initialize notifications safely
+  try {
+    await initNotifications();
+  } catch (_) {}
+
   // Ensure daily notification schedule is active if enabled (default true)
-  final isNotificationsEnabled =
-      sharedPreferences.getBool('notifications_enabled') ?? true;
-  if (isNotificationsEnabled) {
-    final hour = sharedPreferences.getInt('notification_hour') ?? 7;
-    final minute = sharedPreferences.getInt('notification_minute') ?? 0;
-    try {
-      await scheduleDailyNotification(hour: hour, minute: minute);
-    } catch (_) {}
-  }
-  
+  try {
+    final isNotificationsEnabled =
+        sharedPreferences.getBool('notifications_enabled') ?? true;
+    if (isNotificationsEnabled) {
+      final hour = sharedPreferences.getInt('notification_hour') ?? 7;
+      final minute = sharedPreferences.getInt('notification_minute') ?? 0;
+      scheduleDailyNotification(hour: hour, minute: minute)
+          .catchError((_) => const ScheduleResult(success: false));
+    }
+  } catch (_) {}
+
   runApp(
     ProviderScope(
       overrides: [

@@ -40,7 +40,8 @@ Future<void> _configureLocalTimeZone() async {
 
   String? timeZoneName;
   try {
-    final dynamic tzResult = await FlutterTimezone.getLocalTimezone();
+    final dynamic tzResult = await FlutterTimezone.getLocalTimezone()
+        .timeout(const Duration(seconds: 2));
     if (tzResult is String) {
       timeZoneName = tzResult.trim();
     } else if (tzResult != null) {
@@ -214,7 +215,6 @@ NotificationDetails _buildNotificationDetails({
     category: AndroidNotificationCategory.alarm,
     audioAttributesUsage: AudioAttributesUsage.alarm,
     visibility: NotificationVisibility.public,
-    fullScreenIntent: true,
     channelShowBadge: true,
     playSound: true,
     enableVibration: true,

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/notifications.dart';
-import '../../data/models/hadith_model.dart';
 import '../../data/providers/hadith_provider.dart';
 import 'home_screen.dart';
 
@@ -19,7 +18,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-  bool _timeElapsed = false;
 
   @override
   void initState() {
@@ -59,13 +57,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _animationController.forward();
 
-    // Minimum display timer of 2.5 seconds
-    Timer(const Duration(milliseconds: 2500), () {
+    // Minimum display timer of 2.0 seconds
+    Timer(const Duration(milliseconds: 2000), () {
       if (mounted) {
-        setState(() {
-          _timeElapsed = true;
-        });
-        _checkAndNavigate();
+        _navigateToHome();
       }
     });
   }
@@ -76,25 +71,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  void _checkAndNavigate() {
-    final hadithAsync = ref.read(hadithListProvider);
-    if (_timeElapsed && !hadithAsync.isLoading && !hadithAsync.hasError) {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 800),
-          pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
-              child: child,
-            );
-          },
-        ),
-      );
-    }
+  void _navigateToHome() {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            ),
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -103,13 +96,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final bgColor = isDarkMode ? const Color(0xFF0F1E15) : const Color(0xFFFAF7F0);
     final titleColor = isDarkMode ? const Color(0xFFECE6D9) : const Color(0xFF006B3F);
     final goldColor = const Color(0xFFC5A880);
-
-    // Listen to the provider to trigger navigation if loading finishes after the timer
-    ref.listen<AsyncValue<List<HadithModel>>>(hadithListProvider, (previous, next) {
-      if (_timeElapsed && !next.isLoading && !next.hasError) {
-        _checkAndNavigate();
-      }
-    });
 
     return Scaffold(
       backgroundColor: bgColor,
