@@ -90,45 +90,6 @@ void main() {
       expect(args['title'], contains('تُحْفَةُ الوِلْدَانِ'));
     });
 
-    test('scheduleTestCountdownNotification schedules 10s countdown successfully', () async {
-      log.clear();
-      final result = await scheduleTestCountdownNotification(
-        seconds: 10,
-        notificationId: kTestTenSecondsNotificationId,
-      );
-
-      expect(result.success, isTrue);
-      expect(result.scheduledDate, isNotNull);
-      expect(
-        log.any((c) => c.method == 'zonedSchedule'),
-        isTrue,
-      );
-
-      final scheduleCall = log.firstWhere((c) => c.method == 'zonedSchedule');
-      final args = scheduleCall.arguments as Map;
-      expect(args['id'], kTestTenSecondsNotificationId);
-      expect(args['title'], contains('١٠ ثوانٍ'));
-    });
-
-    test('scheduleTestCountdownNotification schedules 60s countdown successfully', () async {
-      log.clear();
-      final result = await scheduleTestCountdownNotification(
-        seconds: 60,
-        notificationId: kTestScheduledNotificationId,
-      );
-
-      expect(result.success, isTrue);
-      expect(result.scheduledDate, isNotNull);
-      expect(
-        log.any((c) => c.method == 'zonedSchedule'),
-        isTrue,
-      );
-
-      final scheduleCall = log.firstWhere((c) => c.method == 'zonedSchedule');
-      final args = scheduleCall.arguments as Map;
-      expect(args['id'], kTestScheduledNotificationId);
-      expect(args['title'], contains('٦٠ ثانية'));
-    });
 
     test('getPendingNotificationRequests parses pending notifications list', () async {
       final list = await getPendingNotificationRequests();

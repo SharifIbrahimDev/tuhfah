@@ -14,8 +14,6 @@ const String kNotificationChannelName = 'تنبيهات حديث اليوم';
 const String kNotificationChannelDescription =
     'تذكير يومي بحديث نبوي شريف من كتاب تحفة الولدان في موعده المحدد';
 const int kDailyNotificationId = 42;
-const int kTestScheduledNotificationId = 99;
-const int kTestTenSecondsNotificationId = 98;
 
 /// Model to return the result of a scheduling operation
 class ScheduleResult {
@@ -403,115 +401,9 @@ Future<ScheduleResult> scheduleDailyNotification({
   }
 }
 
-/// Schedules a test countdown notification with seconds precision
-Future<ScheduleResult> scheduleTestCountdownNotification({
-  int seconds = 60,
-  int notificationId = kTestScheduledNotificationId,
-}) async {
-  await _configureLocalTimeZone();
-
-  // Create target date safely derived from device DateTime.now()
-  final targetDateTime = DateTime.now().add(Duration(seconds: seconds));
-  final targetTime = tz.TZDateTime.from(targetDateTime, tz.local);
-
-  final title = seconds == 10
-      ? 'تُحْفَةُ الوِلْدَانِ — اختبار التنبيه (١٠ ثوانٍ)'
-      : 'تُحْفَةُ الوِلْدَانِ — اختبار التنبيه (٦٠ ثانية)';
-  const body =
-      'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — وصلك التنبيه المجدول بنجاح تام!';
-
-  final notificationDetails = _buildNotificationDetails(
-    title: title,
-    body: body,
-    summary: 'تنبيه اختباري مجدول',
-  );
-
-  await flutterLocalNotificationsPlugin.cancel(notificationId);
-
-  // Tier 1: exactAllowWhileIdle
-  try {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      targetTime,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-    return ScheduleResult(
-      success: true,
-      scheduledDate: targetTime,
-      isExact: true,
-      scheduleMode: 'exactAllowWhileIdle',
-    );
-  } catch (e1) {
-    // Tier 2: alarmClock
-    try {
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        targetTime,
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-      return ScheduleResult(
-        success: true,
-        scheduledDate: targetTime,
-        isExact: true,
-        scheduleMode: 'alarmClock',
-      );
-    } catch (e2) {
-      // Tier 3: exact
-      try {
-        await flutterLocalNotificationsPlugin.zonedSchedule(
-          notificationId,
-          title,
-          body,
-          targetTime,
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.exact,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-        );
-        return ScheduleResult(
-          success: true,
-          scheduledDate: targetTime,
-          isExact: true,
-          scheduleMode: 'exact',
-        );
-      } catch (e3) {
-        // Tier 4: inexact fallback
-        try {
-          await flutterLocalNotificationsPlugin.zonedSchedule(
-            notificationId,
-            title,
-            body,
-            targetTime,
-            notificationDetails,
-            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-          );
-          return ScheduleResult(
-            success: true,
-            scheduledDate: targetTime,
-            isExact: false,
-            scheduleMode: 'inexactAllowWhileIdle',
-          );
-        } catch (e4) {
-          return ScheduleResult(
-            success: false,
-            errorMessage: e4.toString(),
-          );
-        }
-      }
-    }
-  }
+/// Cancels the daily scheduled notification
+Future<void> cancelDailyNotification() async {
+  await flutterLocalNotificationsPlugin.cancel(kDailyNotificationId);
 }
 
 /// Returns list of all currently registered pending notifications
@@ -520,52 +412,6 @@ Future<List<PendingNotificationRequest>> getPendingNotificationRequests() async 
     return await flutterLocalNotificationsPlugin.pendingNotificationRequests();
   } catch (_) {
     return [];
-  }
-}
-
-/// Returns the count of currently registered pending notifications
-Future<int> getPendingNotificationCount() async {
-  final list = await getPendingNotificationRequests();
-  return list.length;
-}
-
-/// Cancels the daily scheduled notification
-Future<void> cancelDailyNotification() async {
-  await flutterLocalNotificationsPlugin.cancel(kDailyNotificationId);
-}
-
-/// Shows an immediate test notification to verify delivery and sound/vibration
-Future<ScheduleResult> showTestNotification({String? title, String? body}) async {
-  try {
-    await requestNotificationPermission();
-
-    final testTitle = title ?? 'تُحْفَةُ الوِلْدَانِ — تجربة الإشعار';
-    final testBody = body ??
-        'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ» — يعمل التنبيه بنجاح!';
-
-    final notificationDetails = _buildNotificationDetails(
-      title: testTitle,
-      body: testBody,
-      summary: 'تجربة الإشعار الفوري',
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      testTitle,
-      testBody,
-      notificationDetails,
-    );
-
-    return ScheduleResult(
-      success: true,
-      scheduledDate: tz.TZDateTime.now(tz.local),
-      scheduleMode: 'immediate',
-    );
-  } catch (e) {
-    return ScheduleResult(
-      success: false,
-      errorMessage: e.toString(),
-    );
   }
 }
 
