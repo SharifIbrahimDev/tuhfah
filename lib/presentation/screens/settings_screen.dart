@@ -106,6 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   Future<void> _showPendingStatusSheet() async {
     final pending = await getPendingNotificationRequests();
     final canExact = await canScheduleExactAlarms();
+    final notifsEnabled = await areNotificationsEnabled();
     if (!mounted) return;
 
     final theme = Theme.of(context);
@@ -139,10 +140,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 ),
               ],
             ),
-            const Divider(height: 24),
-            // Permission status chip
+            const Divider(height: 20),
+            // Permission 1: General Notification Permission
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: notifsEnabled
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: notifsEnabled
+                      ? Colors.green.withValues(alpha: 0.3)
+                      : Colors.red.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  if (!notifsEnabled) ...[
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        await requestNotificationPermission();
+                      },
+                      child: Text('تفعيل الإذن',
+                          style:
+                              GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      notifsEnabled
+                          ? 'إذن إرسال الإشعارات: مفعّل ✅'
+                          : 'إذن إرسال الإشعارات: غير مفعّل ⚠️',
+                      style: GoogleFonts.tajawal(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.bold,
+                        color: notifsEnabled ? Colors.green[800] : Colors.red[900],
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Permission 2: Exact Alarm Permission
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: canExact
                     ? Colors.green.withValues(alpha: 0.1)
@@ -156,25 +205,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               ),
               child: Row(
                 children: [
-                  if (!canExact)
+                  if (!canExact) ...[
                     TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
                       onPressed: () async {
                         Navigator.pop(ctx);
                         await openExactAlarmSettings();
                       },
                       child: Text('منح الإذن',
                           style:
-                              GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+                              GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      canExact
+                          ? 'إذن التنبيهات الدقيقة: مفعّل ✅'
+                          : 'إذن التنبيهات الدقيقة: غير مفعّل ⚠️',
+                      style: GoogleFonts.tajawal(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.bold,
+                        color: canExact ? Colors.green[800] : Colors.orange[900],
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Timezone and Clock info
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    getDetectedTimeZoneName(),
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                   const Spacer(),
                   Text(
-                    canExact
-                        ? 'إذن التنبيهات الدقيقة: مفعّل ✅'
-                        : 'إذن التنبيهات الدقيقة: غير مفعّل ⚠️',
+                    'المنطقة الزمنية المكتشفة:',
                     style: GoogleFonts.tajawal(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: canExact ? Colors.green[800] : Colors.orange[900],
+                      fontSize: 12,
+                      color: isLight ? Colors.grey[700] : Colors.grey[300],
                     ),
                   ),
                 ],
@@ -252,6 +340,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         overflow: TextOverflow.ellipsis),
                   )),
             ],
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isLight ? Colors.grey[100] : const Color(0xFF1E2E28),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '💡 نصيحة لهواتف شاومي، سامسونج، وهواوي: لضمان وصول التنبيه في موعده بدقة أثناء قفل الشاشة، يرجى استثناء التطبيق من تحسين استهلاك البطارية (Battery Optimization) ومنحه إذن التشغيل التلقائي.',
+                style: GoogleFonts.tajawal(
+                  fontSize: 11,
+                  height: 1.5,
+                  color: isLight ? Colors.grey[700] : Colors.grey[400],
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
           ],
         ),
       ),
@@ -568,7 +673,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primary
                                   .withValues(alpha: 0.1),
@@ -579,33 +684,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               ),
                             ),
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.edit_outlined,
-                                    size: 14,
+                                    size: 13,
                                     color: theme.colorScheme.primary),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 4),
                                 Text(
                                   _formatTimeArabic(notificationTime),
                                   style: GoogleFonts.tajawal(
                                     fontWeight: FontWeight.bold,
                                     color: theme.colorScheme.primary,
-                                    fontSize: 13,
+                                    fontSize: 12.5,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Spacer(),
-                          Text(
-                            'تغيير وقت التذكير',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'تغيير وقت التذكير',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.right,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Icon(Icons.access_time_rounded,
-                              size: 20, color: theme.colorScheme.primary),
+                              size: 18, color: theme.colorScheme.primary),
                         ],
                       ),
                     ),
@@ -627,12 +736,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
-                      await showTestNotification();
+                      final res = await showTestNotification();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'تم إرسال إشعار فوري الآن — تحقق من شريط الإشعارات لديك',
+                              res.success
+                                  ? '✅ تم إرسال إشعار فوري بنجاح — تحقق من شريط الإشعارات لديك'
+                                  : '❌ تعذر إرسال الإشعار: ${res.errorMessage ?? "يرجى التحقق من إذن الإشعارات"}',
                               textAlign: TextAlign.right,
                             ),
                           ),
@@ -646,13 +757,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         children: [
                           Icon(Icons.touch_app_outlined,
                               size: 16, color: theme.colorScheme.primary),
-                          const Spacer(),
-                          Text(
-                            'إرسال إشعار فوري للتأكد من الصوت والعرض',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13,
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'إرسال إشعار فوري للتأكد من الصوت والعرض',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 12.5,
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.right,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -676,15 +790,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         children: [
                           Icon(Icons.fact_check_outlined,
                               size: 16, color: theme.colorScheme.primary),
-                          const Spacer(),
-                          Text(
-                            'التقرير التشخيصي المفصل للتنبيهات',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13,
-                              color: isLight
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'التقرير التشخيصي المفصل للتنبيهات',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 12.5,
+                                color: isLight
+                                    ? Colors.grey[700]
+                                    : Colors.grey[300],
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.right,
                             ),
                           ),
                           const SizedBox(width: 8),

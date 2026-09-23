@@ -139,10 +139,6 @@ class _NotificationLiveMonitorCardState
   }
 
   Future<void> _startLiveTest({required int seconds, required String label}) async {
-    if (!widget.canExactAlarms && Platform.isAndroid) {
-      widget.onOpenExactSettings();
-    }
-
     final target = DateTime.now().add(Duration(seconds: seconds));
 
     setState(() {
@@ -236,45 +232,45 @@ class _NotificationLiveMonitorCardState
         children: [
           // Header: Live Clock and Status Title
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Icon(Icons.timer_outlined,
+                  size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'مراقب التنبيهات والعد التنازلي',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 6),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.access_time_filled_rounded,
-                        size: 13, color: theme.colorScheme.primary),
+                        size: 11, color: theme.colorScheme.primary),
                     const SizedBox(width: 4),
                     Text(
                       _formatClockArabic(_currentClock),
                       style: GoogleFonts.tajawal(
-                        fontSize: 11.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    'مراقب التنبيهات والعد التنازلي الحي',
-                    style: GoogleFonts.tajawal(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(Icons.timer_outlined,
-                      size: 18, color: theme.colorScheme.primary),
-                ],
               ),
             ],
           ),
@@ -295,8 +291,18 @@ class _NotificationLiveMonitorCardState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Expanded(
+                        child: Text(
+                          'موعد حديث اليوم: ${_formatTimeArabic(widget.dailyTime)}',
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
@@ -307,23 +313,24 @@ class _NotificationLiveMonitorCardState
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               _pendingAlarmsCount > 0
                                   ? Icons.check_circle_rounded
                                   : Icons.info_outline_rounded,
-                              size: 12,
+                              size: 11,
                               color: _pendingAlarmsCount > 0
                                   ? Colors.green[700]
                                   : Colors.orange[800],
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             Text(
                               _pendingAlarmsCount > 0
-                                  ? 'مسجل بالنظام (نشط)'
+                                  ? 'مسجل بالنظام'
                                   : 'جاري التأكيد',
                               style: GoogleFonts.tajawal(
-                                fontSize: 10.5,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                                 color: _pendingAlarmsCount > 0
                                   ? Colors.green[800]
@@ -331,13 +338,6 @@ class _NotificationLiveMonitorCardState
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      Text(
-                        'موعد حديث اليوم القادم: ${_formatTimeArabic(widget.dailyTime)}',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -412,9 +412,19 @@ class _NotificationLiveMonitorCardState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (_isTestActive)
+                      Expanded(
+                        child: Text(
+                          _testTitle,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_isTestActive) ...[
+                        const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
@@ -424,21 +434,15 @@ class _NotificationLiveMonitorCardState
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'يرن عند: ${_testTargetClock != null ? _formatClockArabic(_testTargetClock!) : ""}',
+                            'يرن: ${_testTargetClock != null ? _formatClockArabic(_testTargetClock!) : ""}',
                             style: GoogleFonts.tajawal(
-                              fontSize: 10.5,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.secondary,
                             ),
                           ),
                         ),
-                      Text(
-                        _testTitle,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -496,13 +500,16 @@ class _NotificationLiveMonitorCardState
                             });
                           },
                         ),
-                        const Spacer(),
-                        Text(
-                          '🎉 حان موعد التنبيه وتم إطلاقه بنجاح على جهازك! ✅',
-                          style: GoogleFonts.tajawal(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[800],
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '🎉 حان موعد التنبيه وتم إطلاقه بنجاح على جهازك! ✅',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[800],
+                            ),
+                            textAlign: TextAlign.right,
                           ),
                         ),
                         const SizedBox(width: 6),
