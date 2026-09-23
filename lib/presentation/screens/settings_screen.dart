@@ -419,7 +419,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: theme.colorScheme.primary
-                                    .withValues(alpha: 0.3),
+                                  .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -453,6 +453,66 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           ),
                           const SizedBox(width: 8),
                           Icon(Icons.access_time_rounded,
+                              size: 18, color: theme.colorScheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Divider(height: 16),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final granted = await requestNotificationPermission();
+                      if (granted) {
+                        final ok = await showSampleNotification();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                ok
+                                    ? 'تم إرسال إشعار تجريبي الآن بنجاح! تفقد شريط الإشعارات.'
+                                    : 'تعذر إرسال الإشعار، يرجى مراجعة أذونات النظام.',
+                                textAlign: TextAlign.right,
+                              ),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'يرجى السماح بإذن الإشعارات للتطبيق من إعدادات النظام',
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.send_rounded,
+                              size: 15, color: theme.colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'إرسال إشعار تجريبي الآن',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.notification_important_outlined,
                               size: 18, color: theme.colorScheme.primary),
                         ],
                       ),

@@ -449,3 +449,26 @@ Future<Map<String, String>> getTodayHadithNotificationContent() async {
     'body': 'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ»',
   };
 }
+
+/// Sends an immediate sample notification with today's Hadith for testing sound, vibration, and banner
+Future<bool> showSampleNotification() async {
+  try {
+    final content = await getTodayHadithNotificationContent();
+    final details = _buildNotificationDetails(
+      title: content['title'] ?? 'تُحْفَةُ الوِلْدَانِ — حديث اليوم',
+      body: content['body'] ??
+          'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ»',
+      summary: 'تجربة الإشعار',
+    );
+    await flutterLocalNotificationsPlugin.show(
+      999,
+      content['title'] ?? 'تُحْفَةُ الوِلْدَانِ — حديث اليوم',
+      content['body'] ??
+          'قال رسول الله ﷺ: «خَيْرُكُمْ مَنْ تَعَلَّمَ القُرْآنَ وَعَلَّمَهُ»',
+      details,
+    );
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
