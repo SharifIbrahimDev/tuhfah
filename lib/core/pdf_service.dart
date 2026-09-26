@@ -5,10 +5,28 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../presentation/screens/pdf_viewer_screen.dart';
 
 class PdfService {
   static const String assetPath = 'assets/data/book.pdf';
-  static const String fileName = 'تحفة_الولدان_من_أحاديث_القرآن.pdf';
+
+  static String getFileName(int part) {
+    if (part == 1) {
+      return 'تحفة_الولدان_الجزء_الأول.pdf';
+    } else if (part == 2) {
+      return 'تحفة_الولدان_الجزء_الثاني.pdf';
+    }
+    return 'تحفة_الولدان_الجزآن_الأول_والثاني.pdf';
+  }
+
+  static String getPartTitle(int part) {
+    if (part == 1) {
+      return 'الجزء الأول (الأحاديث ١/١ — ٤٠/١)';
+    } else if (part == 2) {
+      return 'الجزء الثاني (الأحاديث ١/٢ — ٤٠/٢)';
+    }
+    return 'الكتاب كاملاً (الجزآن الأول والثاني — ٨٠ حديثاً)';
+  }
 
   /// Extracts the PDF bytes from the asset bundle.
   static Future<Uint8List> getPdfBytes() async {
@@ -20,15 +38,19 @@ class PdfService {
   }
 
   /// Saves the PDF to the device's Downloads or Documents directory.
-  static Future<File?> savePdfToDownloads(BuildContext context) async {
+  static Future<File?> savePdfToDownloads(
+    BuildContext context, {
+    int part = 0,
+  }) async {
     try {
       final bytes = await getPdfBytes();
+      final fileName = getFileName(part);
+      final partTitle = getPartTitle(part);
 
       Directory? targetDir;
 
       if (!kIsWeb) {
         if (Platform.isAndroid) {
-          // Attempt standard Android public Downloads directory
           final publicDownload = Directory('/storage/emulated/0/Download');
           if (await publicDownload.exists()) {
             targetDir = publicDownload;
@@ -41,7 +63,6 @@ class PdfService {
           targetDir = await getDownloadsDirectory() ??
               await getApplicationDocumentsDirectory();
         } else {
-          // iOS and other platforms
           targetDir = await getApplicationDocumentsDirectory();
         }
       }
@@ -73,11 +94,11 @@ class PdfService {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'تم تنزيل الكتاب بنجاح!',
+                        'تم تنزيل $partTitle بنجاح!',
                         style: GoogleFonts.tajawal(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 13.5,
                         ),
                       ),
                       Text(
@@ -98,7 +119,7 @@ class PdfService {
               label: 'مشاركة',
               textColor: const Color(0xFFC5A880),
               onPressed: () {
-                sharePdf(context);
+                sharePdf(context, part: part);
               },
             ),
           ),
@@ -135,9 +156,14 @@ class PdfService {
   }
 
   /// Shares the PDF file via the system share sheet.
-  static Future<void> sharePdf(BuildContext context) async {
+  static Future<void> sharePdf(
+    BuildContext context, {
+    int part = 0,
+  }) async {
     try {
       final bytes = await getPdfBytes();
+      final fileName = getFileName(part);
+      final partTitle = getPartTitle(part);
       final tempDir = await getTemporaryDirectory();
       final tempFile = File('${tempDir.path}/$fileName');
       await tempFile.writeAsBytes(bytes, flush: true);
@@ -151,8 +177,8 @@ class PdfService {
       await Share.shareXFiles(
         [xFile],
         text:
-            'كتاب: تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ\nتأليف: إبراهيم شريف أبوبكر',
-        subject: 'كتاب تُحْفَةُ الوِلْدَانِ PDF',
+            'كتاب: تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ ($partTitle)\nتأليف: إبراهيم شريف أبوبكر',
+        subject: 'كتاب تُحْفَةُ الوِلْدَانِ ($partTitle) PDF',
       );
     } catch (e) {
       if (context.mounted) {
@@ -169,14 +195,15 @@ class PdfService {
     }
   }
 
-  /// Opens a modern modal bottom sheet with download & share options.
-  static void showDownloadModal(BuildContext context) {
+  /// Opens a modern modal bottom sheet with download & share options for Book 1, Book 2, and Complete.
+  static void showDownloadModal(BuildContext context, {int initialPart = 0}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final green = const Color(0xFF006B3F);
     final gold = const Color(0xFFC5A880);
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: isDark ? const Color(0xFF14241B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -216,7 +243,7 @@ class PdfService {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'كتاب تُحْفَةُ الوِلْدَانِ',
+                            'كتاب تُحْفَةُ الوِلْدَانِ (PDF)',
                             style: GoogleFonts.tajawal(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -224,7 +251,7 @@ class PdfService {
                             ),
                           ),
                           Text(
-                            'تأليف: إبراهيم شريف أبوبكر • PDF (٣.٢ ميجابايت)',
+                            'تأليف: إبراهيم شريف أبوبكر • متوفر بالجزءين الأول والثاني',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
                               color: gold,
@@ -240,69 +267,196 @@ class PdfService {
                 const Divider(height: 1),
                 const SizedBox(height: 12),
 
-                // Option 1: Direct Save
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.download_rounded, color: green),
-                  ),
-                  title: Text(
-                    'تنزيل وحفظ في الجهاز',
-                    style: GoogleFonts.tajawal(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'حفظ نسخة PDF في مجلد التنزيلات بالجهاز',
-                    style: GoogleFonts.tajawal(fontSize: 12),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
+                // Option 1: Book 1 (الجزء الأول)
+                _buildPartTile(
+                  context: context,
+                  title: 'الكتاب الأول: الجزء الأول',
+                  subtitle: 'الأحاديث ١/١ — ٤٠/١ (نسخة PDF جاهزة للتحميل والقراءة)',
+                  badgeColor: green,
+                  partNumber: 1,
+                  onRead: () {
                     Navigator.pop(ctx);
-                    savePdfToDownloads(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PdfViewerScreen(initialPart: 1),
+                      ),
+                    );
+                  },
+                  onDownload: () {
+                    Navigator.pop(ctx);
+                    savePdfToDownloads(context, part: 1);
+                  },
+                  onShare: () {
+                    Navigator.pop(ctx);
+                    sharePdf(context, part: 1);
                   },
                 ),
 
-                const SizedBox(height: 6),
+                const Divider(height: 16),
 
-                // Option 2: Share / Save to Apps
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: gold.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.share_rounded, color: gold),
-                  ),
-                  title: Text(
-                    'مشاركة أو إرسال عبر التطبيقات',
-                    style: GoogleFonts.tajawal(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'إرسال الكتاب عبر واتساب، تيليجرام، البريد، أو حفظ في درايف',
-                    style: GoogleFonts.tajawal(fontSize: 12),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
+                // Option 2: Book 2 (الجزء الثاني)
+                _buildPartTile(
+                  context: context,
+                  title: 'الكتاب الثاني: الجزء الثاني',
+                  subtitle: 'الأحاديث ١/٢ — ٤٠/٢ (نسخة PDF جاهزة للتحميل والقراءة)',
+                  badgeColor: gold,
+                  partNumber: 2,
+                  onRead: () {
                     Navigator.pop(ctx);
-                    sharePdf(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PdfViewerScreen(initialPart: 2),
+                      ),
+                    );
+                  },
+                  onDownload: () {
+                    Navigator.pop(ctx);
+                    savePdfToDownloads(context, part: 2);
+                  },
+                  onShare: () {
+                    Navigator.pop(ctx);
+                    sharePdf(context, part: 2);
                   },
                 ),
-                const SizedBox(height: 8),
+
+                const Divider(height: 16),
+
+                // Option 3: Complete Book (كلا الجزأين)
+                _buildPartTile(
+                  context: context,
+                  title: 'الكتاب كاملاً (الجزآن ١ و ٢)',
+                  subtitle: 'جميع الأحاديث الثمانين مع التقاريظ والمقدمات',
+                  badgeColor: const Color(0xFF00897B),
+                  partNumber: 0,
+                  onRead: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PdfViewerScreen(initialPart: 0),
+                      ),
+                    );
+                  },
+                  onDownload: () {
+                    Navigator.pop(ctx);
+                    savePdfToDownloads(context, part: 0);
+                  },
+                  onShare: () {
+                    Navigator.pop(ctx);
+                    sharePdf(context, part: 0);
+                  },
+                ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  static Widget _buildPartTile({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required Color badgeColor,
+    required int partNumber,
+    required VoidCallback onRead,
+    required VoidCallback onDownload,
+    required VoidCallback onShare,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: badgeColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                partNumber == 0
+                    ? '٨٠ حديثاً'
+                    : '٤٠ حديثاً',
+                style: GoogleFonts.tajawal(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: badgeColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.tajawal(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 11.5,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: onShare,
+              icon: const Icon(Icons.share_rounded, size: 15),
+              label: Text('مشاركة', style: GoogleFonts.tajawal(fontSize: 12)),
+            ),
+            const SizedBox(width: 6),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: onDownload,
+              icon: const Icon(Icons.download_rounded, size: 15),
+              label: Text('تنزيل', style: GoogleFonts.tajawal(fontSize: 12)),
+            ),
+            const SizedBox(width: 6),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: badgeColor,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: onRead,
+              icon: const Icon(Icons.menu_book_rounded, size: 15),
+              label: Text(
+                'قراءة',
+                style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

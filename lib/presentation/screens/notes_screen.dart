@@ -23,7 +23,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     super.dispose();
   }
 
-  void _showEditNoteDialog(BuildContext context, int hadithId, String hadithTitle, String currentNote) {
+  void _showEditNoteDialog(BuildContext context, int hadithId, String formattedNumber, String hadithTitle, String currentNote) {
     final textController = TextEditingController(text: currentNote);
 
     showDialog(
@@ -33,7 +33,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           title: Text(
-            'تعديل الملاحظة • الحديث $hadithId',
+            'تعديل الملاحظة • الحديث $formattedNumber',
             textAlign: TextAlign.right,
             style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 16),
           ),
@@ -595,6 +595,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                                             onPressed: () => _showEditNoteDialog(
                                               context,
                                               hadith.id,
+                                              hadith.formattedNumber,
                                               hadith.title,
                                               noteItem.note,
                                             ),
@@ -628,14 +629,18 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                                               padding: const EdgeInsets.symmetric(
                                                   horizontal: 8, vertical: 3),
                                               decoration: BoxDecoration(
-                                                color: theme.colorScheme.primary
+                                                color: (hadith.partNumber == 1
+                                                        ? theme.colorScheme.primary
+                                                        : theme.colorScheme.secondary)
                                                     .withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                '#${hadith.id}',
+                                                hadith.formattedNumber,
                                                 style: TextStyle(
-                                                  color: theme.colorScheme.primary,
+                                                  color: hadith.partNumber == 1
+                                                      ? theme.colorScheme.primary
+                                                      : theme.colorScheme.secondary,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 12,
                                                 ),

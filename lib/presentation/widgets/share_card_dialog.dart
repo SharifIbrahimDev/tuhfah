@@ -301,10 +301,10 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   border: Border.all(color: goldColor.withValues(alpha: 0.4)),
                 ),
                 child: Text(
-                  'الحديث ${hadith.id}',
+                  '${hadith.fullDisplayNumber} • ${hadith.partLabel}',
                   style: GoogleFonts.tajawal(
                     color: goldColor,
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -457,10 +457,10 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   border: Border.all(color: goldColor.withValues(alpha: 0.4)),
                 ),
                 child: Text(
-                  'الحديث ${hadith.id}',
+                  '${hadith.fullDisplayNumber} • ${hadith.partLabel}',
                   style: GoogleFonts.tajawal(
                     color: goldColor,
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -606,10 +606,10 @@ class _ShareCardDialogState extends State<ShareCardDialog> {
                   border: Border.all(color: greenBorder.withValues(alpha: 0.3)),
                 ),
                 child: Text(
-                  'الحديث ${hadith.id}',
+                  '${hadith.fullDisplayNumber} • ${hadith.partLabel}',
                   style: GoogleFonts.tajawal(
                     color: greenBorder,
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

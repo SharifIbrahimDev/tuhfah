@@ -56,7 +56,7 @@ class FavoritesNotifier extends StateNotifier<Set<int>> {
   void _loadFavorites() {
     final list = _prefs.getStringList(_key);
     if (list != null) {
-      state = list.map(int.parse).toSet();
+      state = list.map((e) => int.tryParse(e)).whereType<int>().toSet();
     }
   }
 
@@ -360,7 +360,7 @@ class HadithNotesNotifier extends StateNotifier<Map<int, HadithNote>> {
       final noteDate =
           '${entry.value.updatedAt.year}/${entry.value.updatedAt.month.toString().padLeft(2, '0')}/${entry.value.updatedAt.day.toString().padLeft(2, '0')}';
 
-      buffer.writeln('🔹 [الحديث ${entry.key}]: ${hadith.title}');
+      buffer.writeln('🔹 [الحديث ${hadith.formattedNumber} — ${hadith.partLabel}]: ${hadith.title}');
       if (hadith.narrator.isNotEmpty) {
         buffer.writeln('👤 الراوي: ${hadith.narrator}');
       }

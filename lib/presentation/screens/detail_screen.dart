@@ -190,7 +190,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                       onPressed: () => Navigator.pop(modalContext),
                     ),
                     Text(
-                      'ملاحظاتي حول الحديث ${hadith.id}',
+                      'ملاحظاتي حول الحديث ${hadith.formattedNumber}',
                       style: GoogleFonts.tajawal(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -297,9 +297,25 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       appBar: _isImmersionMode
           ? null
           : AppBar(
-              title: Text(
-                'الحديث ${widget.hadithId}',
-                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+              title: hadithsAsync.when(
+                data: (hadiths) {
+                  final hadith = hadiths.firstWhere(
+                    (h) => h.id == widget.hadithId,
+                    orElse: () => hadiths.first,
+                  );
+                  return Text(
+                    hadith.fullDisplayNumber,
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                  );
+                },
+                loading: () => Text(
+                  'الحديث ${widget.hadithId}',
+                  style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                ),
+                error: (_, __) => Text(
+                  'الحديث ${widget.hadithId}',
+                  style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                ),
               ),
               centerTitle: true,
               actions: [
@@ -483,7 +499,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                           ),
                         ),
                         Text(
-                          'الحديث ${hadith.id} من ${hadiths.length}',
+                          '${hadith.fullDisplayNumber} • ${hadith.partLabel}',
                           style: GoogleFonts.tajawal(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -511,7 +527,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                isPart1 ? 'الجزء الأول' : 'الجزء الثاني',
+                                isPart1
+                                    ? 'الكتاب الأول: الجزء الأول'
+                                    : 'الكتاب الثاني: الجزء الثاني',
                                 style: GoogleFonts.tajawal(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -767,13 +785,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Explanations/Footnotes Section (If any exist)
+                        // Explanations/Footnotes Section (Hawashi & Ta'liqaat)
                         if (hadith.footnotes.isNotEmpty) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(
-                                'التعليقات والإيضاحات',
+                                'الحواشي والتعليقات المعتمدة',
                                 style: GoogleFonts.tajawal(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -781,46 +799,89 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Icon(Icons.lightbulb_outline_rounded,
-                                  color: theme.colorScheme.secondary, size: 20),
+                              Icon(Icons.menu_book_rounded,
+                                  color: theme.colorScheme.secondary, size: 22),
                             ],
                           ),
                           const SizedBox(height: 12),
                           ...hadith.footnotes.map((footnote) {
+                            String? sourceName;
+                            String content = footnote;
+                            final bracketMatch = RegExp(r'^\[(.*?)\]:\s*(.*)$').firstMatch(footnote);
+                            if (bracketMatch != null) {
+                              sourceName = bracketMatch.group(1);
+                              content = bracketMatch.group(2) ?? '';
+                            }
+
                             return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
+                              margin: const EdgeInsets.only(bottom: 14),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? const Color(0xFF1A2D25)
-                                    : const Color(0xFFF3EEE3),
+                                    : const Color(0xFFFBF8F2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: theme.colorScheme.secondary.withValues(alpha: 0.35),
-                                  width: 1,
+                                  width: 1.2,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               width: double.infinity,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      footnote,
-                                      textAlign: TextAlign.right,
-                                      textDirection: TextDirection.rtl,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: 15,
-                                        height: 1.65,
-                                        color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                                  if (sourceName != null && sourceName.isNotEmpty) ...[
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                                            width: 0.8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              sourceName,
+                                              style: GoogleFonts.tajawal(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: theme.colorScheme.primary,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(
+                                              Icons.auto_stories_rounded,
+                                              size: 15,
+                                              color: theme.colorScheme.secondary,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Icon(
-                                    Icons.info_outline_rounded,
-                                    color: theme.colorScheme.secondary,
-                                    size: 20,
+                                    const SizedBox(height: 10),
+                                  ],
+                                  Text(
+                                    content,
+                                    textAlign: TextAlign.right,
+                                    textDirection: TextDirection.rtl,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontSize: 15,
+                                      height: 1.7,
+                                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF2D3748),
+                                    ),
                                   ),
                                 ],
                               ),

@@ -395,7 +395,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _buildPillOption(
-                  title: 'الجزء ٢ (٤١—٨٠)',
+                  title: 'الجزء الثاني (١—٤٠/٢)',
                   isSelected: _selectedScope == QuizScope.part2,
                   onTap: () => setState(() => _selectedScope = QuizScope.part2),
                   theme: theme,
@@ -404,7 +404,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _buildPillOption(
-                  title: 'الجزء ١ (١—٤٠)',
+                  title: 'الجزء الأول (١—٤٠/١)',
                   isSelected: _selectedScope == QuizScope.part1,
                   onTap: () => setState(() => _selectedScope = QuizScope.part1),
                   theme: theme,
@@ -675,7 +675,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '📖 ${currentQ.hadith.title}',
+                          '📖 ${currentQ.hadith.fullDisplayNumber}: ${currentQ.hadith.title}',
                           style: GoogleFonts.tajawal(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -889,10 +889,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         size: 20,
                       ),
                       Text(
-                        item.question.hadith.title,
+                        '${item.question.hadith.fullDisplayNumber}: ${item.question.hadith.title}',
                         style: GoogleFonts.tajawal(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 13.5,
                         ),
                       ),
                     ],

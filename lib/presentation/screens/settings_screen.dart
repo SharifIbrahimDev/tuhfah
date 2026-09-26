@@ -458,66 +458,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       ),
                     ),
                   ),
-
-                  const Divider(height: 16),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      final granted = await requestNotificationPermission();
-                      if (granted) {
-                        final ok = await showSampleNotification();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                ok
-                                    ? 'تم إرسال إشعار تجريبي الآن بنجاح! تفقد شريط الإشعارات.'
-                                    : 'تعذر إرسال الإشعار، يرجى مراجعة أذونات النظام.',
-                                textAlign: TextAlign.right,
-                              ),
-                              duration: const Duration(seconds: 3),
-                            ),
-                          );
-                        }
-                      } else {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'يرجى السماح بإذن الإشعارات للتطبيق من إعدادات النظام',
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4.0, vertical: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.send_rounded,
-                              size: 15, color: theme.colorScheme.primary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'إرسال إشعار تجريبي الآن',
-                              style: GoogleFonts.tajawal(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.primary,
-                              ),
-                              textAlign: TextAlign.right,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.notification_important_outlined,
-                              size: 18, color: theme.colorScheme.primary),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ],
             ),
@@ -774,31 +714,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           // Section 7: About Screen Navigation
           Container(
             decoration: cardDecoration,
-            child: ListTile(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AboutScreen()),
-                );
-              },
-              leading:
-                  Icon(Icons.chevron_left, color: theme.colorScheme.primary),
-              trailing:
-                  Icon(Icons.info_outline, color: theme.colorScheme.primary),
-              title: Text(
-                'عن الكتاب والناشر',
-                textAlign: TextAlign.right,
-                style: GoogleFonts.tajawal(
-                    fontWeight: FontWeight.bold, fontSize: 15),
-              ),
-              subtitle: Text(
-                'المؤلف، التقديم، المراجعون، والناشر',
-                textAlign: TextAlign.right,
-                style: GoogleFonts.tajawal(
-                  fontSize: 12,
-                  color: isLight ? Colors.grey[600] : Colors.grey[400],
+            child: Column(
+              children: [
+                ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AboutScreen()),
+                    );
+                  },
+                  leading:
+                      Icon(Icons.chevron_left, color: theme.colorScheme.primary),
+                  trailing:
+                      Icon(Icons.info_outline, color: theme.colorScheme.primary),
+                  title: Text(
+                    'عن الكتاب والناشر',
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.tajawal(
+                        fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  subtitle: Text(
+                    'المؤلف، التقديم، المراجعون، والناشر',
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12,
+                      color: isLight ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                  ),
                 ),
-              ),
+                const Divider(height: 1),
+                ListTile(
+                  onTap: () => AboutScreen.showPrivacyPolicyDialog(context),
+                  leading:
+                      Icon(Icons.chevron_left, color: theme.colorScheme.primary),
+                  trailing:
+                      Icon(Icons.shield_outlined, color: theme.colorScheme.primary),
+                  title: Text(
+                    'سياسة الخصوصية',
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.tajawal(
+                        fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  subtitle: Text(
+                    'أمان البيانات، الخصوصية، والتخزين المحلي',
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12,
+                      color: isLight ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 24),

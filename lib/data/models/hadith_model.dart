@@ -31,6 +31,21 @@ class HadithModel {
     );
   }
 
+  /// Returns 1 for Hadiths 1-40 (Book 1), and 2 for Hadiths 41-80 (Book 2)
+  int get partNumber => id <= 40 ? 1 : 2;
+
+  /// Returns 1..40 within its respective Part/Book
+  int get numberInPart => id <= 40 ? id : (id - 40);
+
+  /// Returns the formatted count e.g. "1/1" up to "40/1", and "1/2" up to "40/2"
+  String get formattedNumber => '$numberInPart/$partNumber';
+
+  /// Arabic label for the part: "الجزء الأول" or "الجزء الثاني"
+  String get partLabel => id <= 40 ? 'الجزء الأول' : 'الجزء الثاني';
+
+  /// Full Arabic display title e.g. "الحديث 1/1"
+  String get fullDisplayNumber => 'الحديث $formattedNumber';
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -43,3 +58,4 @@ class HadithModel {
     };
   }
 }
+

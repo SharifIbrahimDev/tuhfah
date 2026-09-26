@@ -10,6 +10,7 @@ import '../screens/pdf_viewer_screen.dart';
 import '../screens/about_screen.dart';
 import '../screens/quiz_screen.dart';
 import '../screens/notes_screen.dart';
+import '../screens/references_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
   final TabController tabController;
@@ -241,14 +242,26 @@ class AppDrawer extends ConsumerWidget {
                   child: Divider(height: 1),
                 ),
                 _DrawerTile(
-                  title: 'قراءة الكتاب (PDF)',
+                  title: 'قراءة الجزء الأول (١/١ — ٤٠/١)',
                   icon: Icons.menu_book_rounded,
-                  iconColor: const Color(0xFFE74C3C),
+                  iconColor: green,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const PdfViewerScreen()),
+                      MaterialPageRoute(builder: (_) => const PdfViewerScreen(initialPart: 1)),
+                    );
+                  },
+                ),
+                _DrawerTile(
+                  title: 'قراءة الجزء الثاني (١/٢ — ٤٠/٢)',
+                  icon: Icons.menu_book_rounded,
+                  iconColor: gold,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PdfViewerScreen(initialPart: 2)),
                     );
                   },
                 ),
@@ -274,9 +287,21 @@ class AppDrawer extends ConsumerWidget {
                   },
                 ),
                 _DrawerTile(
+                  title: 'أهم مصادر ومراجع الكتاب',
+                  icon: Icons.library_books_rounded,
+                  iconColor: gold,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ReferencesScreen()),
+                    );
+                  },
+                ),
+                _DrawerTile(
                   title: 'عن الكتاب والناشر',
                   icon: Icons.info_outline_rounded,
-                  iconColor: gold,
+                  iconColor: green,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(

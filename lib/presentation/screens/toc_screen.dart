@@ -153,7 +153,7 @@ class _TocScreenState extends ConsumerState<TocScreen> {
                   children: [
                     if (part1.isNotEmpty) ...[
                       _SectionHeader(
-                        title: 'الجزء الأول (الأحاديث ١ — ٤٠)',
+                        title: 'الكتاب الأول: الجزء الأول (الأحاديث ١/١ — ٤٠/١)',
                         color: green,
                         count: '${part1.length} حديثاً',
                       ),
@@ -173,7 +173,7 @@ class _TocScreenState extends ConsumerState<TocScreen> {
                     ],
                     if (part2.isNotEmpty) ...[
                       _SectionHeader(
-                        title: 'الجزء الثاني (الأحاديث ٤١ — ٨٠)',
+                        title: 'الكتاب الثاني: الجزء الثاني (الأحاديث ١/٢ — ٤٠/٢)',
                         color: gold,
                         count: '${part2.length} حديثاً',
                       ),
@@ -244,7 +244,7 @@ class _SectionHeader extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.tajawal(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -272,6 +272,8 @@ class _TocItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final itemColor = hadith.partNumber == 1 ? green : gold;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       decoration: BoxDecoration(
@@ -297,20 +299,21 @@ class _TocItem extends StatelessWidget {
           textAlign: TextAlign.right,
         ),
         trailing: Container(
-          width: 32,
-          height: 32,
+          constraints: const BoxConstraints(minWidth: 42),
+          height: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: green.withValues(alpha: 0.1),
-            border: Border.all(color: green.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(10),
+            color: itemColor.withValues(alpha: 0.1),
+            border: Border.all(color: itemColor.withValues(alpha: 0.35)),
           ),
           alignment: Alignment.center,
           child: Text(
-            '${hadith.id}',
+            hadith.formattedNumber,
             style: GoogleFonts.tajawal(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: green,
+              color: itemColor,
             ),
           ),
         ),
@@ -318,3 +321,4 @@ class _TocItem extends StatelessWidget {
     );
   }
 }
+

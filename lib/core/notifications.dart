@@ -424,7 +424,11 @@ Future<Map<String, String>> getTodayHadithNotificationContent() async {
       final now = DateTime.now();
       final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
       final index = dayOfYear % jsonList.length;
-      final hadith = jsonList[index];
+      final id = (hadith['id'] as num?)?.toInt() ?? (index + 1);
+      final partNum = id <= 40 ? 1 : 2;
+      final numInPart = id <= 40 ? id : (id - 40);
+      final formattedId = '$numInPart/$partNum';
+
       final title = hadith['title'] ?? 'حديث اليوم';
       final text = (hadith['text'] as String? ?? '')
           .replaceAll('«', '')
@@ -436,7 +440,7 @@ Future<Map<String, String>> getTodayHadithNotificationContent() async {
       final previewText = text.isNotEmpty ? '«$text»' : narrator;
 
       return {
-        'title': 'تُحْفَةُ الوِلْدَانِ — $title',
+        'title': 'تُحْفَةُ الوِلْدَانِ — الحديث $formattedId: $title',
         'body': previewText.length > 180
             ? '${previewText.substring(0, 180)}...'
             : previewText,

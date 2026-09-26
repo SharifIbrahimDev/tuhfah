@@ -4,7 +4,12 @@ import 'package:pdfx/pdfx.dart';
 import '../../core/pdf_service.dart';
 
 class PdfViewerScreen extends StatefulWidget {
-  const PdfViewerScreen({super.key});
+  final int initialPart; // 1 = Book 1, 2 = Book 2, 0 = All
+
+  const PdfViewerScreen({
+    super.key,
+    this.initialPart = 1,
+  });
 
   @override
   State<PdfViewerScreen> createState() => _PdfViewerScreenState();
@@ -15,10 +20,12 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   int _currentPage = 1;
   int _totalPages = 0;
   bool _isLoading = true;
+  late int _activePart;
 
   @override
   void initState() {
     super.initState();
+    _activePart = widget.initialPart;
     _pdfController = PdfControllerPinch(
       document: PdfDocument.openAsset('assets/data/book.pdf'),
     );
@@ -29,7 +36,27 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     if (mounted) {
       setState(() {
         _currentPage = _pdfController.page;
+        if (_totalPages > 0) {
+          final midPoint = (_totalPages / 2).ceil();
+          if (_currentPage >= midPoint) {
+            _activePart = 2;
+          } else {
+            _activePart = 1;
+          }
+        }
       });
+    }
+  }
+
+  void _jumpToPart(int part) {
+    setState(() => _activePart = part);
+    if (_totalPages == 0) return;
+
+    if (part == 1) {
+      _pdfController.jumpToPage(1);
+    } else if (part == 2) {
+      final midPoint = (_totalPages / 2).ceil();
+      _pdfController.jumpToPage(midPoint > 1 ? midPoint : 1);
     }
   }
 
@@ -51,8 +78,12 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
-          'كتاب تُحْفَةُ الوِلْدَانِ',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          _activePart == 1
+              ? 'الكتاب الأول: الجزء الأول'
+              : (_activePart == 2
+                  ? 'الكتاب الثاني: الجزء الثاني'
+                  : 'كتاب تُحْفَةُ الوِلْدَانِ'),
+          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 17),
         ),
         centerTitle: false,
         actions: [
@@ -76,19 +107,48 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                 ),
               ),
             ),
-          // Download / Save button
+          // Download / Save button for active part
           IconButton(
             icon: const Icon(Icons.download_rounded),
             tooltip: 'تنزيل وحفظ الكتاب PDF',
-            onPressed: () => PdfService.showDownloadModal(context),
+            onPressed: () => PdfService.showDownloadModal(context, initialPart: _activePart),
           ),
-          // Share button
+          // Share button for active part
           IconButton(
             icon: const Icon(Icons.share_rounded),
             tooltip: 'مشاركة ملف PDF',
-            onPressed: () => PdfService.sharePdf(context),
+            onPressed: () => PdfService.sharePdf(context, part: _activePart),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildPartTab(
+                    title: 'الجزء الأول (١/١ — ٤٠/١)',
+                    partNumber: 1,
+                    isSelected: _activePart == 1,
+                    activeColor: green,
+                    onTap: () => _jumpToPart(1),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildPartTab(
+                    title: 'الجزء الثاني (١/٢ — ٤٠/٢)',
+                    partNumber: 2,
+                    isSelected: _activePart == 2,
+                    activeColor: gold,
+                    onTap: () => _jumpToPart(2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: PdfViewPinch(
         controller: _pdfController,
@@ -98,6 +158,10 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               _totalPages = doc.pagesCount;
               _isLoading = false;
             });
+            if (widget.initialPart == 2) {
+              final midPoint = (doc.pagesCount / 2).ceil();
+              _pdfController.jumpToPage(midPoint > 1 ? midPoint : 1);
+            }
           }
         },
         onPageChanged: (page) {
@@ -163,6 +227,45 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildPartTab({
+    required String title,
+    required int partNumber,
+    required bool isSelected,
+    required Color activeColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.18)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? activeColor
+                : Colors.grey.withValues(alpha: 0.3),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          title,
+          style: GoogleFonts.tajawal(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            color: isSelected ? activeColor : Colors.grey[700],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }
