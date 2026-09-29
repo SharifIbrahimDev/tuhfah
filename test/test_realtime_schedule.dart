@@ -77,6 +77,7 @@ void main() {
 
     expect(result.success, isTrue);
     expect(result.isExact, isTrue);
+    expect(result.scheduleMode, equals('alarmClock'));
     expect(result.scheduledDate, isNotNull);
     expect(result.scheduledDate!.hour, equals(15));
     expect(result.scheduledDate!.minute, equals(47));

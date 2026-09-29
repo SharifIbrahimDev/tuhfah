@@ -57,6 +57,20 @@ void main() {
         return 'UTC';
       },
     );
+
+    // Mock battery method channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('com.sharifibrahimdev.tuhfah/battery'),
+      (MethodCall call) async {
+        if (call.method == 'isIgnoringBatteryOptimizations') {
+          return true;
+        } else if (call.method == 'requestIgnoreBatteryOptimizations') {
+          return true;
+        }
+        return null;
+      },
+    );
   });
 
   tearDown(() {
@@ -73,11 +87,13 @@ void main() {
       );
     });
 
-    test('scheduleDailyNotification schedules daily notification successfully', () async {
+    test('scheduleDailyNotification schedules daily notification successfully with alarmClock', () async {
       log.clear();
       final result = await scheduleDailyNotification(hour: 7, minute: 30);
 
       expect(result.success, isTrue);
+      expect(result.isExact, isTrue);
+      expect(result.scheduleMode, 'alarmClock');
       expect(result.scheduledDate, isNotNull);
       expect(
         log.any((c) => c.method == 'zonedSchedule'),
@@ -90,7 +106,6 @@ void main() {
       expect(args['title'], contains('تُحْفَةُ الوِلْدَانِ'));
     });
 
-
     test('getPendingNotificationRequests parses pending notifications list', () async {
       final list = await getPendingNotificationRequests();
       expect(list.length, 1);
@@ -101,6 +116,16 @@ void main() {
     test('canScheduleExactAlarms checks exact alarm permission on Android', () async {
       final canExact = await canScheduleExactAlarms();
       expect(canExact, isTrue);
+    });
+
+    test('isIgnoringBatteryOptimizations returns battery optimization status', () async {
+      final isIgnoring = await isIgnoringBatteryOptimizations();
+      expect(isIgnoring, isTrue);
+    });
+
+    test('requestIgnoreBatteryOptimizations invokes platform request', () async {
+      final requested = await requestIgnoreBatteryOptimizations();
+      expect(requested, isTrue);
     });
   });
 }

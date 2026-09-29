@@ -182,6 +182,33 @@ Future<bool> openExactAlarmSettings() async {
   return false;
 }
 
+const MethodChannel _batteryChannel =
+    MethodChannel('com.sharifibrahimdev.tuhfah/battery');
+
+/// Checks if the app is currently excluded from Android battery optimizations (Unrestricted)
+Future<bool> isIgnoringBatteryOptimizations() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    final bool? isIgnoring =
+        await _batteryChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations');
+    return isIgnoring ?? false;
+  } catch (_) {
+    return true;
+  }
+}
+
+/// Requests system prompt/screen to disable battery optimization for reliable background alarms
+Future<bool> requestIgnoreBatteryOptimizations() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    final bool? success =
+        await _batteryChannel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
+    return success ?? false;
+  } catch (_) {
+    return false;
+  }
+}
+
 /// Requests notifications permission (POST_NOTIFICATIONS on Android 13+ / iOS)
 Future<bool> requestNotificationPermission() async {
   bool granted = true;
@@ -311,7 +338,7 @@ Future<ScheduleResult> scheduleDailyNotification({
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
 
-  // Tier 1: exactAllowWhileIdle (standard exact alarm that wakes from doze)
+  // Tier 1: alarmClock (highest priority Android alarm, wakes CPU directly from Deep Doze)
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       kDailyNotificationId,
@@ -319,7 +346,7 @@ Future<ScheduleResult> scheduleDailyNotification({
       notifBody,
       scheduledDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -328,10 +355,10 @@ Future<ScheduleResult> scheduleDailyNotification({
       success: true,
       scheduledDate: scheduledDate,
       isExact: true,
-      scheduleMode: 'exactAllowWhileIdle',
+      scheduleMode: 'alarmClock',
     );
   } catch (e1) {
-    // Tier 2: alarmClock
+    // Tier 2: exactAllowWhileIdle (standard exact alarm that wakes from doze)
     try {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         kDailyNotificationId,
@@ -339,7 +366,7 @@ Future<ScheduleResult> scheduleDailyNotification({
         notifBody,
         scheduledDate,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
@@ -348,7 +375,7 @@ Future<ScheduleResult> scheduleDailyNotification({
         success: true,
         scheduledDate: scheduledDate,
         isExact: true,
-        scheduleMode: 'alarmClock',
+        scheduleMode: 'exactAllowWhileIdle',
       );
     } catch (e2) {
       // Tier 3: standard exact

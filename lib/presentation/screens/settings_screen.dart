@@ -16,12 +16,13 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with WidgetsBindingObserver {
   bool _canExactAlarms = true;
+  bool _isBatteryOptimized = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkExactAlarmStatus();
+    _checkPermissionsAndBatteryStatus();
   }
 
   @override
@@ -33,17 +34,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _checkExactAlarmStatus();
+      _checkPermissionsAndBatteryStatus();
     }
   }
 
-  Future<void> _checkExactAlarmStatus() async {
+  Future<void> _checkPermissionsAndBatteryStatus() async {
     if (!Platform.isAndroid) return;
     try {
       final canExact = await canScheduleExactAlarms();
+      final isIgnoringBattery = await isIgnoringBatteryOptimizations();
       if (mounted) {
         setState(() {
           _canExactAlarms = canExact;
+          _isBatteryOptimized = !isIgnoringBattery;
         });
       }
     } catch (_) {}
@@ -95,6 +98,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               await openExactAlarmSettings();
             },
             child: Text('تفعيل الإذن الآن',
+                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _promptBatteryOptimization(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'استثناء من توفير البطارية',
+              style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.battery_saver_rounded, color: Color(0xFF006B3F)),
+          ],
+        ),
+        content: Text(
+          'تقوم بعض الهواتف (مثل Samsung و Xiaomi و Oppo و Huawei) بتجميد التطبيقات أثناء سكون الهاتف أو إيقاف الشاشة ليلاً، مما قد يؤخر تنبيه حديث الصباح.\n\nلضمان وصول التنبيه في وقته بدقة، يرجى استثناء التطبيق من قيود البطارية (اختيار: بدون قيود / Unrestricted).',
+          textAlign: TextAlign.right,
+          style: GoogleFonts.tajawal(fontSize: 14, height: 1.6),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('لاحقاً', style: GoogleFonts.tajawal()),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await requestIgnoreBatteryOptimizations();
+            },
+            child: Text('ضبط البطارية الآن',
                 style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
           ),
         ],
@@ -235,7 +284,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               hour: notificationTime.hour,
                               minute: notificationTime.minute,
                             );
-                            _checkExactAlarmStatus();
+                            _checkPermissionsAndBatteryStatus();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -355,6 +404,61 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ),
                 ],
 
+                // Recommendation Card if Battery Optimization is enabled on Android
+                if (notificationsEnabled &&
+                    Platform.isAndroid &&
+                    _isBatteryOptimized) ...[
+                  const SizedBox(height: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _promptBatteryOptimization(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F4FD),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFBEE5EB)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 14, color: Color(0xFF0C5460)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'مهم: استثناء التطبيق من تحسين البطارية',
+                                  style: GoogleFonts.tajawal(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.5,
+                                    color: const Color(0xFF0C5460),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'انقر هنا لمنع النظام من تجميد التنبيه في موعده أثناء نوم الهاتف',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 11.5,
+                                    color: const Color(0xFF0C5460),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.battery_saver_rounded,
+                              color: Color(0xFF0C5460), size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
                 if (notificationsEnabled) ...[
                   const Divider(height: 20),
                   InkWell(
@@ -383,7 +487,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           hour: picked.hour,
                           minute: picked.minute,
                         );
-                        _checkExactAlarmStatus();
+                        _checkPermissionsAndBatteryStatus();
                         if (context.mounted && res.scheduledDate != null) {
                           final now = DateTime.now();
                           final diffMinutes =
