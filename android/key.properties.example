@@ -1,0 +1,8 @@
+# Keystore configuration for Google Play Store release builds
+# Copy this file to 'key.properties' in the same folder (android/key.properties)
+# Do NOT commit key.properties or .jks to git (it is already in .gitignore)
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=../upload-keystore.jks
