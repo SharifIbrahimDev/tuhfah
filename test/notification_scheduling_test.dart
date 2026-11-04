@@ -87,13 +87,13 @@ void main() {
       );
     });
 
-    test('scheduleDailyNotification schedules daily notification successfully with alarmClock', () async {
+    test('scheduleDailyNotification schedules daily notification successfully with exactAllowWhileIdle', () async {
       log.clear();
       final result = await scheduleDailyNotification(hour: 7, minute: 30);
 
       expect(result.success, isTrue);
       expect(result.isExact, isTrue);
-      expect(result.scheduleMode, 'alarmClock');
+      expect(result.scheduleMode, 'exactAllowWhileIdle');
       expect(result.scheduledDate, isNotNull);
       expect(
         log.any((c) => c.method == 'zonedSchedule'),

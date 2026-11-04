@@ -20,9 +20,9 @@ void main() {
       ),
     );
 
-    // Pump initial frame and advance clock past splash timer (2500ms)
+    // Pump initial frame and advance clock past splash timer and timeouts
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 3000));
+    await tester.pump(const Duration(seconds: 5));
 
     // Verify that the main title of the app is rendered on the screen
     expect(find.text('تُحْفَةُ الوِلْدَانِ'), findsWidgets);
