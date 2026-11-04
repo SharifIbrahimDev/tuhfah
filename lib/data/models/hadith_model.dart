@@ -31,17 +31,25 @@ class HadithModel {
     );
   }
 
-  /// Returns 1 for Hadiths 1-40 (Book 1), and 2 for Hadiths 41-80 (Book 2)
-  int get partNumber => id <= 40 ? 1 : 2;
+  /// Returns 1 for Hadiths 1-40 (Book 1), 2 for Hadiths 41-80 (Book 2), and 3 for Hadiths 81-131 (Book 3)
+  int get partNumber => id <= 40 ? 1 : (id <= 80 ? 2 : 3);
 
-  /// Returns 1..40 within its respective Part/Book
-  int get numberInPart => id <= 40 ? id : (id - 40);
+  /// Returns 1..51 within its respective Part/Book
+  int get numberInPart {
+    if (id <= 40) return id;
+    if (id <= 80) return id - 40;
+    return id - 80;
+  }
 
-  /// Returns the formatted count e.g. "1/1" up to "40/1", and "1/2" up to "40/2"
+  /// Returns the formatted count e.g. "1/1", "1/2", or "1/3"
   String get formattedNumber => '$numberInPart/$partNumber';
 
-  /// Arabic label for the part: "الجزء الأول" or "الجزء الثاني"
-  String get partLabel => id <= 40 ? 'الجزء الأول' : 'الجزء الثاني';
+  /// Arabic label for the part: "الجزء الأول", "الجزء الثاني", or "الجزء الثالث"
+  String get partLabel {
+    if (id <= 40) return 'الجزء الأول';
+    if (id <= 80) return 'الجزء الثاني';
+    return 'الجزء الثالث';
+  }
 
   /// Full Arabic display title e.g. "الحديث 1/1"
   String get fullDisplayNumber => 'الحديث $formattedNumber';

@@ -49,7 +49,8 @@ class _TocScreenState extends ConsumerState<TocScreen> {
           }).toList();
 
           final part1 = filtered.where((h) => h.id <= 40).toList();
-          final part2 = filtered.where((h) => h.id > 40).toList();
+          final part2 = filtered.where((h) => h.id > 40 && h.id <= 80).toList();
+          final part3 = filtered.where((h) => h.id > 80).toList();
 
           return Column(
             children: [
@@ -67,7 +68,7 @@ class _TocScreenState extends ConsumerState<TocScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '٨٠ حديثاً شريفاً',
+                        '${hadiths.length} حديثاً شريفاً',
                         style: GoogleFonts.tajawal(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -189,6 +190,26 @@ class _TocScreenState extends ConsumerState<TocScreen> {
                               ),
                             ),
                           )),
+                      const SizedBox(height: 14),
+                    ],
+                    if (part3.isNotEmpty) ...[
+                      _SectionHeader(
+                        title: 'الكتاب الثالث: الجزء الثالث (الأحاديث ١/٣ — ٤٠/٣)',
+                        color: const Color(0xFFD97706),
+                        count: '${part3.length} حديثاً',
+                      ),
+                      ...part3.map((h) => _TocItem(
+                            hadith: h,
+                            gold: gold,
+                            green: green,
+                            isDark: isDark,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => DetailScreen(hadithId: h.id),
+                              ),
+                            ),
+                          )),
                       const SizedBox(height: 24),
                     ],
                   ],
@@ -272,7 +293,9 @@ class _TocItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemColor = hadith.partNumber == 1 ? green : gold;
+    final itemColor = hadith.partNumber == 1
+        ? green
+        : (hadith.partNumber == 2 ? gold : const Color(0xFFD97706));
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),

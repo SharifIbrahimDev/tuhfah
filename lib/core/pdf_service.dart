@@ -8,28 +8,42 @@ import 'package:share_plus/share_plus.dart';
 import '../presentation/screens/pdf_viewer_screen.dart';
 
 class PdfService {
-  static const String assetPath = 'assets/data/book.pdf';
+  static String getAssetPath(int part) {
+    if (part == 1) {
+      return 'assets/data/book1.pdf';
+    } else if (part == 2) {
+      return 'assets/data/book2.pdf';
+    } else if (part == 3) {
+      return 'assets/data/book3.pdf';
+    }
+    return 'assets/data/book_combined.pdf';
+  }
 
   static String getFileName(int part) {
     if (part == 1) {
-      return 'تحفة_الولدان_الجزء_الأول.pdf';
+      return 'تحفة_الولدان_الجزء_الأول_Book_1.pdf';
     } else if (part == 2) {
-      return 'تحفة_الولدان_الجزء_الثاني.pdf';
+      return 'تحفة_الولدان_الجزء_الثاني_Book_2.pdf';
+    } else if (part == 3) {
+      return 'تحفة_الولدان_الجزء_الثالث_Book_3.pdf';
     }
-    return 'تحفة_الولدان_الجزآن_الأول_والثاني.pdf';
+    return 'تحفة_الولدان_الأجزاء_الثلاثة_المجمعة_Complete_1_to_3.pdf';
   }
 
   static String getPartTitle(int part) {
     if (part == 1) {
-      return 'الجزء الأول (الأحاديث ١/١ — ٤٠/١)';
+      return 'الكتاب الأول: الجزء الأول (الأحاديث ١/١ — ٤٠/١)';
     } else if (part == 2) {
-      return 'الجزء الثاني (الأحاديث ١/٢ — ٤٠/٢)';
+      return 'الكتاب الثاني: الجزء الثاني (الأحاديث ١/٢ — ٤٠/٢)';
+    } else if (part == 3) {
+      return 'الكتاب الثالث: الجزء الثالث (الأحاديث ١/٣ — ٤٠/٣)';
     }
-    return 'الكتاب كاملاً (الجزآن الأول والثاني — ٨٠ حديثاً)';
+    return 'الموسوعة الكاملة (الأجزاء الثلاثة المجمعة — ١٢٠ حديثاً)';
   }
 
-  /// Extracts the PDF bytes from the asset bundle.
-  static Future<Uint8List> getPdfBytes() async {
+  /// Extracts the PDF bytes from the asset bundle for the given part.
+  static Future<Uint8List> getPdfBytes({int part = 0}) async {
+    final assetPath = getAssetPath(part);
     final byteData = await rootBundle.load(assetPath);
     return byteData.buffer.asUint8List(
       byteData.offsetInBytes,
@@ -43,7 +57,7 @@ class PdfService {
     int part = 0,
   }) async {
     try {
-      final bytes = await getPdfBytes();
+      final bytes = await getPdfBytes(part: part);
       final fileName = getFileName(part);
       final partTitle = getPartTitle(part);
 
@@ -161,7 +175,7 @@ class PdfService {
     int part = 0,
   }) async {
     try {
-      final bytes = await getPdfBytes();
+      final bytes = await getPdfBytes(part: part);
       final fileName = getFileName(part);
       final partTitle = getPartTitle(part);
       final tempDir = await getTemporaryDirectory();
@@ -251,7 +265,7 @@ class PdfService {
                             ),
                           ),
                           Text(
-                            'تأليف: إبراهيم شريف أبوبكر • متوفر بالجزءين الأول والثاني',
+                            'تأليف: إبراهيم شريف أبوبكر • متوفر بالأجزاء الأول والثاني والثالث',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
                               color: gold,
@@ -323,11 +337,39 @@ class PdfService {
 
                 const Divider(height: 16),
 
-                // Option 3: Complete Book (كلا الجزأين)
+                // Option 3: Book 3 (الجزء الثالث)
                 _buildPartTile(
                   context: context,
-                  title: 'الكتاب كاملاً (الجزآن ١ و ٢)',
-                  subtitle: 'جميع الأحاديث الثمانين مع التقاريظ والمقدمات',
+                  title: 'الكتاب الثالث: الجزء الثالث',
+                  subtitle: 'الأحاديث ١/٣ — ٤٠/٣ (نسخة PDF جاهزة للتحميل والقراءة)',
+                  badgeColor: const Color(0xFFD97706),
+                  partNumber: 3,
+                  onRead: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PdfViewerScreen(initialPart: 3),
+                      ),
+                    );
+                  },
+                  onDownload: () {
+                    Navigator.pop(ctx);
+                    savePdfToDownloads(context, part: 3);
+                  },
+                  onShare: () {
+                    Navigator.pop(ctx);
+                    sharePdf(context, part: 3);
+                  },
+                ),
+
+                const Divider(height: 16),
+
+                // Option 4: Complete Trilogy (الأجزاء الثلاثة المجمعة)
+                _buildPartTile(
+                  context: context,
+                  title: 'الموسوعة الكاملة (الأجزاء ١ و ٢ و ٣)',
+                  subtitle: 'جميع الأحاديث الـ ١٢٠ مع التقاريظ والمقدمات ومراحل التدوين والختام',
                   badgeColor: const Color(0xFF00897B),
                   partNumber: 0,
                   onRead: () {
@@ -381,7 +423,7 @@ class PdfService {
               ),
               child: Text(
                 partNumber == 0
-                    ? '٨٠ حديثاً'
+                    ? '١٢٠ حديثاً'
                     : '٤٠ حديثاً',
                 style: GoogleFonts.tajawal(
                   fontSize: 11,

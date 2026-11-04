@@ -26,8 +26,7 @@ void main() async {
     if (isNotificationsEnabled) {
       final hour = sharedPreferences.getInt('notification_hour') ?? 7;
       final minute = sharedPreferences.getInt('notification_minute') ?? 0;
-      scheduleDailyNotification(hour: hour, minute: minute)
-          .catchError((_) => const ScheduleResult(success: false));
+      await scheduleDailyNotification(hour: hour, minute: minute);
     }
   } catch (_) {}
 

@@ -26,8 +26,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   void initState() {
     super.initState();
     _activePart = widget.initialPart;
+    _initController(_activePart);
+  }
+
+  void _initController(int part) {
+    _isLoading = true;
     _pdfController = PdfControllerPinch(
-      document: PdfDocument.openAsset('assets/data/book.pdf'),
+      document: PdfDocument.openAsset(PdfService.getAssetPath(part)),
     );
     _pdfController.addListener(_onPageChanged);
   }
@@ -36,28 +41,19 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     if (mounted) {
       setState(() {
         _currentPage = _pdfController.page;
-        if (_totalPages > 0) {
-          final midPoint = (_totalPages / 2).ceil();
-          if (_currentPage >= midPoint) {
-            _activePart = 2;
-          } else {
-            _activePart = 1;
-          }
-        }
       });
     }
   }
 
-  void _jumpToPart(int part) {
-    setState(() => _activePart = part);
-    if (_totalPages == 0) return;
-
-    if (part == 1) {
-      _pdfController.jumpToPage(1);
-    } else if (part == 2) {
-      final midPoint = (_totalPages / 2).ceil();
-      _pdfController.jumpToPage(midPoint > 1 ? midPoint : 1);
-    }
+  void _switchPart(int part) {
+    if (_activePart == part) return;
+    _pdfController.removeListener(_onPageChanged);
+    _pdfController.dispose();
+    setState(() {
+      _activePart = part;
+      _currentPage = 1;
+      _initController(part);
+    });
   }
 
   @override
@@ -82,7 +78,9 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               ? 'الكتاب الأول: الجزء الأول'
               : (_activePart == 2
                   ? 'الكتاب الثاني: الجزء الثاني'
-                  : 'كتاب تُحْفَةُ الوِلْدَانِ'),
+                  : (_activePart == 3
+                      ? 'الكتاب الثالث: الجزء الثالث'
+                      : 'الموسوعة الكاملة (١ — ٣)')),
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 17),
         ),
         centerTitle: false,
@@ -123,26 +121,46 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Row(
               children: [
                 Expanded(
                   child: _buildPartTab(
-                    title: 'الجزء الأول (١/١ — ٤٠/١)',
+                    title: 'الجزء الأول',
                     partNumber: 1,
                     isSelected: _activePart == 1,
                     activeColor: green,
-                    onTap: () => _jumpToPart(1),
+                    onTap: () => _switchPart(1),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Expanded(
                   child: _buildPartTab(
-                    title: 'الجزء الثاني (١/٢ — ٤٠/٢)',
+                    title: 'الجزء الثاني',
                     partNumber: 2,
                     isSelected: _activePart == 2,
                     activeColor: gold,
-                    onTap: () => _jumpToPart(2),
+                    onTap: () => _switchPart(2),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: _buildPartTab(
+                    title: 'الجزء الثالث',
+                    partNumber: 3,
+                    isSelected: _activePart == 3,
+                    activeColor: const Color(0xFFD97706),
+                    onTap: () => _switchPart(3),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: _buildPartTab(
+                    title: 'الكامل',
+                    partNumber: 0,
+                    isSelected: _activePart == 0,
+                    activeColor: const Color(0xFF00897B),
+                    onTap: () => _switchPart(0),
                   ),
                 ),
               ],
@@ -151,6 +169,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         ),
       ),
       body: PdfViewPinch(
+        key: ValueKey('pdf_viewer_part_$_activePart'),
         controller: _pdfController,
         onDocumentLoaded: (doc) {
           if (mounted) {
@@ -158,10 +177,6 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               _totalPages = doc.pagesCount;
               _isLoading = false;
             });
-            if (widget.initialPart == 2) {
-              final midPoint = (doc.pagesCount / 2).ceil();
-              _pdfController.jumpToPage(midPoint > 1 ? midPoint : 1);
-            }
           }
         },
         onPageChanged: (page) {

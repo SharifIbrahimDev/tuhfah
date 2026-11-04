@@ -17,6 +17,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with WidgetsBindingObserver {
   bool _canExactAlarms = true;
   bool _isBatteryOptimized = false;
+  bool _systemNotificationsGranted = true;
+  int _pendingCount = 0;
+  String _detectedTimeZone = '';
 
   @override
   void initState() {
@@ -35,18 +38,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkPermissionsAndBatteryStatus();
+      final isEnabled = ref.read(notificationsEnabledProvider);
+      if (isEnabled) {
+        final time = ref.read(notificationTimeProvider);
+        scheduleDailyNotification(hour: time.hour, minute: time.minute).then((_) {
+          _checkPermissionsAndBatteryStatus();
+        });
+      }
     }
   }
 
   Future<void> _checkPermissionsAndBatteryStatus() async {
-    if (!Platform.isAndroid) return;
     try {
+      final notifGranted = await areNotificationsEnabled();
       final canExact = await canScheduleExactAlarms();
       final isIgnoringBattery = await isIgnoringBatteryOptimizations();
+      final pending = await getPendingNotificationRequests();
+      final tzName = getDetectedTimeZoneName();
       if (mounted) {
         setState(() {
+          _systemNotificationsGranted = notifGranted;
           _canExactAlarms = canExact;
           _isBatteryOptimized = !isIgnoringBattery;
+          _pendingCount = pending.length;
+          _detectedTimeZone = tzName;
         });
       }
     } catch (_) {}
@@ -349,6 +364,63 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ],
                 ),
 
+                // Warning Card if System Notifications are blocked on Android
+                if (notificationsEnabled &&
+                    Platform.isAndroid &&
+                    !_systemNotificationsGranted) ...[
+                  const SizedBox(height: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      await openNotificationSettings();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8D7DA),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFF5C6CB)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 14, color: Color(0xFF721C24)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'تنبيه: إشعارات التطبيق متوقفة في إعدادات النظام',
+                                  style: GoogleFonts.tajawal(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.5,
+                                    color: const Color(0xFF721C24),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'انقر هنا لفتح الإعدادات والسماح للتطبيق بإظهار التنبيهات',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 11.5,
+                                    color: const Color(0xFF721C24),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.notifications_off_rounded,
+                              color: Color(0xFF721C24), size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
                 // Warning Card if Exact Alarms Permission is missing on Android
                 if (notificationsEnabled &&
                     Platform.isAndroid &&
@@ -560,6 +632,121 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               size: 18, color: theme.colorScheme.primary),
                         ],
                       ),
+                    ),
+                  ),
+
+                  const Divider(height: 20),
+
+                  // Live Status Dashboard
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isLight
+                          ? const Color(0xFFF8F9FA)
+                          : const Color(0xFF1E2825),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isLight
+                            ? const Color(0xFFE9ECEF)
+                            : const Color(0xFF2A3A35),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: _pendingCount > 0
+                                    ? Colors.green.withValues(alpha: 0.15)
+                                    : Colors.orange.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _pendingCount > 0
+                                        ? Icons.check_circle_rounded
+                                        : Icons.hourglass_top_rounded,
+                                    size: 13,
+                                    color: _pendingCount > 0
+                                        ? Colors.green[700]
+                                        : Colors.orange[800],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _pendingCount > 0
+                                        ? 'نشط في نظام الهاتف'
+                                        : 'بانتظار الجدولة',
+                                    style: GoogleFonts.tajawal(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: _pendingCount > 0
+                                          ? Colors.green[700]
+                                          : Colors.orange[800],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              'حالة الجدولة المباشرة',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'يومياً في ${_formatTimeArabic(notificationTime)}',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            Text(
+                              'موعد التنبيه القادم:',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 12,
+                                color: isLight ? Colors.grey[600] : Colors.grey[400],
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_detectedTimeZone.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _detectedTimeZone,
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 11.5,
+                                  color: isLight ? Colors.grey[700] : Colors.grey[300],
+                                ),
+                              ),
+                              Text(
+                                'المنطقة الزمنية المعتمدة:',
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 11.5,
+                                  color: isLight ? Colors.grey[600] : Colors.grey[400],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],

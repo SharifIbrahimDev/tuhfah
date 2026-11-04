@@ -312,7 +312,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   'الحديث ${widget.hadithId}',
                   style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
                 ),
-                error: (_, __) => Text(
+                error: (err, stack) => Text(
                   'الحديث ${widget.hadithId}',
                   style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
                 ),
