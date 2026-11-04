@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4 portrait; margin: 22mm 18mm 22mm 18mm; }
+        body { font-family: 'Amiri', serif; font-size: 15pt; line-height: 2.0; color: #1a1a1a; margin: 0; padding: 0; text-align: justify; }
+        h1, h2, h3, h4 { font-family: 'Tajawal', sans-serif; color: #006B3F; text-align: center; margin-top: 0; }
+        .cover-page { box-sizing: border-box; height: 100vh; display: flex; justify-content: center; align-items: center; page-break-after: always; padding: 5mm; background-color: #FAF7F0; }
+        .cover-border { box-sizing: border-box; width: 100%; height: 100%; border: 4px double #006B3F; padding: 10mm 15mm; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+        .cover-header { width: 100%; text-align: center; margin-top: 5mm; }
+        .original-title { font-family: 'Tajawal', sans-serif; font-size: 44pt; font-weight: 900; color: #006B3F; margin-bottom: 2mm; letter-spacing: 1px; }
+        .original-from { font-family: 'Amiri', serif; font-size: 22pt; font-weight: bold; color: #28a745; margin-bottom: 2mm; }
+        .original-subtitle { font-family: 'Tajawal', sans-serif; font-size: 26pt; font-weight: bold; color: #1a1a1a; margin-bottom: 5mm; }
+        .cover-part-badge { width: 34mm; height: 34mm; border-radius: 50%; border: 3px solid #C5A880; background-color: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin: 2mm 0; }
+        .badge-label { font-family: 'Tajawal', sans-serif; font-size: 12pt; font-weight: bold; color: #555; }
+        .badge-number { font-family: 'Tajawal', sans-serif; font-size: 20pt; font-weight: 900; color: #006B3F; }
+        .cover-people-section { width: 100%; display: flex; justify-content: space-between; margin-top: 5mm; direction: rtl; }
+        .people-col { width: 48%; }
+        .right-col { text-align: right; }
+        .left-col { text-align: left; }
+        .people-title { font-family: 'Tajawal', sans-serif; font-size: 15pt; font-weight: bold; color: #C5A880; margin-bottom: 2mm; border-bottom: 1px solid #ECE6D9; display: inline-block; padding-bottom: 1mm; }
+        .people-name { font-family: 'Tajawal', sans-serif; font-size: 14pt; font-weight: bold; color: #1a1a1a; line-height: 1.5; }
+        .people-subname { font-family: 'Tajawal', sans-serif; font-size: 12pt; color: #555; margin-top: 1mm; }
+        .cover-reviewers-section { width: 100%; text-align: center; margin-top: 5mm; }
+        .reviewers-title { font-family: 'Tajawal', sans-serif; font-size: 14pt; font-weight: bold; color: #006B3F; margin-bottom: 3mm; }
+        .reviewers-names { display: flex; justify-content: space-around; width: 100%; font-family: 'Tajawal', sans-serif; font-size: 12pt; font-weight: 500; color: #333; direction: rtl; }
+        .cover-footer { width: 100%; text-align: center; margin-bottom: 5mm; border-top: 1px solid #ECE6D9; padding-top: 4mm; }
+        .footer-edition { font-family: 'Tajawal', sans-serif; font-size: 13pt; font-weight: bold; color: #006B3F; margin-bottom: 1mm; }
+        .footer-date { font-family: 'Tajawal', sans-serif; font-size: 12pt; color: #555; }
+        .page-break { page-break-before: always; }
+        .section-title { font-size: 26pt; font-weight: bold; margin-bottom: 10mm; border-bottom: 2px solid #C5A880; padding-bottom: 5mm; }
+        .section-subtitle { font-size: 14pt; color: #666; margin-top: -6mm; margin-bottom: 10mm; font-style: italic; font-family: 'Tajawal', sans-serif; }
+        .preface-text { font-size: 16pt; white-space: pre-wrap; margin-bottom: 12mm; text-align: justify; line-height: 1.9; }
+        .hadith-card { margin-bottom: 24mm; page-break-inside: avoid; border: 2px double #006B3F; border-radius: 16px; padding: 22px; background-color: #FAF9F6; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .hadith-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #C5A880; padding-bottom: 10px; margin-bottom: 16px; }
+        .hadith-number { font-family: 'Tajawal', sans-serif; font-size: 17pt; font-weight: bold; color: #006B3F; }
+        .hadith-part-tag { font-family: 'Tajawal', sans-serif; font-size: 11pt; font-weight: bold; color: #C5A880; background-color: rgba(197, 168, 128, 0.15); padding: 3px 10px; border-radius: 6px; margin-right: 8px; }
+        .hadith-source-badge { font-family: 'Tajawal', sans-serif; font-size: 12pt; font-weight: bold; background-color: #006B3F; color: white; padding: 5px 12px; border-radius: 8px; }
+        .hadith-title { font-family: 'Tajawal', sans-serif; font-size: 20pt; font-weight: bold; color: #006B3F; margin-bottom: 12px; text-align: center; }
+        .hadith-narrator { font-size: 14.5pt; font-weight: bold; color: #8B7355; margin-bottom: 14px; text-align: right; border-right: 4px solid #C5A880; padding-right: 12px; }
+        .hadith-text { font-size: 21pt; font-weight: 500; text-align: center; line-height: 2.0; margin-bottom: 16px; padding: 10px 0; color: #0d0d0d; }
+        .footnotes-section { background-color: #FFFDF9; border-top: 1px dashed #C5A880; padding-top: 14px; margin-top: 16px; }
+        .footnotes-header { font-family: 'Tajawal', sans-serif; font-size: 13pt; font-weight: bold; color: #006B3F; margin-bottom: 10px; }
+        .footnote-item { font-size: 13.5pt; line-height: 1.75; margin-bottom: 10px; color: #2D3748; text-align: justify; }
+        .footnote-source { font-family: 'Tajawal', sans-serif; font-weight: bold; color: #006B3F; background-color: rgba(0, 107, 63, 0.08); padding: 2px 8px; border-radius: 6px; margin-left: 6px; display: inline-block; }
+            @page {
+            size: A4 portrait;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-center {
+                content: counter(page);
+                font-family: 'Tajawal', sans-serif;
+                font-size: 10pt;
+                color: #777;
+            }
+        }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .cover-page {
+                page-break-after: always;
+                height: 100vh;
+            }
+            .hadith-card {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cover-page">
+        <div class="cover-border">
+            <div class="cover-header">
+                <div class="original-title">تُحْفَةُ الوِلْدَانِ</div>
+                <div class="original-from">مِنْ</div>
+                <div class="original-subtitle">أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ</div>
+            </div>
+            <div class="cover-part-badge">
+                <div class="badge-label">الْجُزْءُ</div>
+                <div class="badge-number">٢</div>
+            </div>
+            <div class="cover-people-section">
+                <div class="people-col right-col">
+                    <div class="people-title">تَأْلِيفُ</div>
+                    <div class="people-name">إِبْرَاهِيم شَرِيف أَبُوبَكْر</div>
+                </div>
+                <div class="people-col left-col">
+                    <div class="people-title">تَقْدِيمُ</div>
+                    <div class="people-name">فَضِيلَة الشَّيْخ الحَافِظ</div>
+                    <div class="people-subname">(أَبُو مُحَمَّد) مُحَمَّد أَبُوبَكْر</div>
+                </div>
+            </div>
+            <div class="cover-reviewers-section">
+                <div class="reviewers-title">مُرَاجَعَةُ أَسَانِيدِ الفَضِيلَةِ المَشَايِخِ</div>
+                <div class="reviewers-names">
+                    <span>إِبْرَاهِيم سُلَيْمَان إِبْرَاهِيم (بَابَاجِي)</span>
+                    <span>عَبْدُاللهِ بن عُمَر</span>
+                    <span>أَبُوبَكْر شَرِيف أَبُوبَكْر</span>
+                </div>
+            </div>
+            <div class="cover-footer">
+                <div class="footer-edition">الطَّبْعَةُ الأُولَى (١٤٤٥ هـ / ٢٠٢٤ م)</div>
+                <div class="footer-date">مركز عبدالله بن مسعود • كدونا، نيجيريا</div>
+            </div>
+        </div>
+    </div>
+
+<div class="page-break">
+        <h1 class="section-title">مقدمة الجزء الثاني: إبراهيم شريف أبوبكر</h1>
+        <div class="section-subtitle">مدير مركز عبدالله بن مسعود</div>
+        <div class="preface-text">بسم الله الرحمن الرحيم<br><br>إن الحمد لله، نحمده ونستعينه ونستغفره، ونعوذ بالله من شرور أنفسنا ومن سيئات أعمالنا، من يهده الله فلا مضل له، ومن يضلل فلا هادي له، وأشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله، الذي كانت وصيته الخالدة لأمته: «أَوْصَى بِكِتَابِ اللَّهِ»، وجعل خير الناس من اتصل به تعلماً وتعليماً وعملاً.<br><br>أما بعد:<br>فبعد أن مَنّ الله تعالى بإتمام ونشر الجزء الأول من «تُحْفَةُ الوِلْدَانِ مِنْ أَحَادِيثِ النَّبِيِّ ﷺ عَنِ القُرْآنِ»، وما لاقاه بحمد الله من إقبال ونفع في صفوف الناشئة وحلقات التحفيظ، يسرني أن أضع بين يدي القراء والمعلمين وطلاب العلم هذا «الجزء الثاني» المتمم للسلسلة، والمشتمل على أربعين حديثاً نبوياً شريفاً (من الحديث ١/٢ إلى الحديث ٤٠/٢).<br><br>وقد عنيتُ في هذا الجزء بانتقاء أحاديث صحيحة تكشف للناشئ حقيقة الوحي ونزوله، وتغرس فيه تعظيم كلام الله، وتوقفه على أسرار التلاوة النبوية من الترتيل والمد والبكاء والتدبر، وترشده إلى الآداب القلبية في حلقات المدارسة، وتعرّفه بفضائل أعظم السور والآيات وما أودع الله فيها من البركة والتحصين والشفاء، مع التحذير من آفات القراء كالرياء والتكسب بالقرآن.<br><br>وأسأل الله العلي القدير أن يجعل هذا الجزء كسابقه خالصاً لوجهه الكريم، وسبباً لرسوخ القرآن في قلوب أبنائنا وبناتنا، وأن ينفع به كل من قرأه أو حفظه أو علّمه، إنه نعم المولى ونعم النصير.<br><br>كتبه:<br>إبراهيم شريف أبوبكر<br>مدير مركز عبدالله بن مسعود لتحفيظ القرآن والدراسات الإسلامية<br>تَمِينْ نَيْئًا — كدونا، نيجيريا.</div>
+    </div>
+    <div class="page-break">
+        <h1 class="section-title">تمهيد الجزء الثاني: المنهج العلمي ومحاور الأحاديث</h1>
+        <div class="section-subtitle">المسار الموضوعي للأحاديث الأربعين (١/٢ — ٤٠/٢)</div>
+        <div class="preface-text">يشتمل الجزء الثاني على أربعين حديثاً نبوياً شريفاً رُتبت ترتيباً تربوياً دقيقاً يتناول أبعاداً تفصيلية في علاقة المسلم بالقرآن الكريم:<br><br>١. أصالة الوحي وعظمة القرآن (الأحاديث ١/٢ — ٦/٢):<br>افتتح الجزء بالتأكيد على تجديد النية والإخلاص، ثم بيان كيفية نزول الوحي الشريف على النبي ﷺ، والتذكير بوصيته ﷺ بكتاب الله وأنه كلام الله المعجز، ورخصة الأحرف السبعة، ومثل المؤمن الذي يقرأ القرآن كالأترجة طيبة الريح والطعم.<br><br>٢. التلقي والتعليم وآداب التلاوة والمساجد (الأحاديث ٧/٢ — ١٦/٢):<br>بيان فضل التعليم في الصغر وتلقي القرآن مشافهة عن المقرئين، وسنة النبي ﷺ في مد التلاوة والترتيل، والبكاء والخشوع عند سماع الآيات، واستحباب تحسين الصوت بالقرآن، والإنصات لقراءة الإمام، وفضل اجتماع الحلقات في بيوت الله لنزول السكينة وغشيان الرحمة، مع مراعاة أدب المسجد بالنهي عن التشويش على المصلين برفع الصوت بالقراءة.<br><br>٣. أجر التلاوة وأحوال القائمين بالليل (الأحاديث ١٧/٢ — ٢٥/٢):<br>مضاعفة الحسنات بعشر أمثالها لكل حرف، ووصية تعاهد القرآن كالإبل المعقلة، والتحذير من نسيانه، وفضل الماهر وتضعيف الأجر للمتعتع، وسنة النبي ﷺ في صلاة الليل بالتفاعل مع آيات الرحمة والعذاب، وترديد الآية الواحدة طلباً للتدبر، والقِران بين النظائر، وتفاوت أجور القائمين بعشر آيات ومائة آية وألف آية، وعظم ثواب القراءة داخل الصلاة.<br><br>٤. صفات القراء والتحذير من الآفات المفسدة (الأحاديث ٢٦/٢ — ٣١/٢):<br>سنة سجود التلاوة، وسعة علم الصحابة بأسباب النزول كابن مسعود، وإلباس صاحب القرآن تاج وحلة الكرامة يوم القيامة، ثم التحذير الصريح المتتابع من آفات القراء: النهي عن الجدال والمراء، والتحذير من الرياء وقراءة الحناجر بلا فهم، والنهي الحاسم عن التكسب بالقرآن وسؤال أموال الناس به.<br><br>٥. فضائل السور المخصوصة والرقية والتحصين بالمعوذات (الأحاديث ٣٢/٢ — ٤٠/٢):<br>عظمة سورة الفاتحة التي لم ينزل مثلها في التوراة ولا الإنجيل، وآية الكرسي أعظم آية في كتاب الله، وبركة سورة البقرة في طرد الشياطين من البيوت، وتنزل السكينة لقارئ الكهف، ومكانة سورة الإخلاص الموجبة للجنة بكونها ثلث القرآن، وختام الجزء بالثلاثية الجامعة في بركة المعوذات: قراءتها دبر كل صلاة، والنفث والمسح بها عند النوم، ومشروعية الرقية والاستشفاء والمسح بها عند المرض.<br><br>المؤلف</div>
+    </div>
+    <div class="page-break">
+        <h1 class="section-title">الكتاب الثاني: الجزء الثاني</h1>
+        <div style="text-align: center; font-size: 18pt; font-style: italic; margin-bottom: 20mm; color: #8B7355;">
+            الأحاديث الأربعون الثانية (١/٢ — ٤٠/٢) مع الحواشي والتعليقات المعتمدة من كتب أهل السنة والجماعة
+        </div>
+    </div>
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 1/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 1، مسلم: 1907)</span>
+        </div>
+        <div class="hadith-title">تَجْدِيدُ النِّيَّةِ وَالإِخْلَاصُ فِي طَلَبِ العِلْمِ وَالقُرْآنِ</div>
+        <div class="hadith-narrator">عن عمر بن الخطاب رضي الله عنه قال: سمعت رسول الله صلى الله عليه وسلم يقول:</div>
+        <div class="hadith-text">«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى، فَمَنْ كَانَتْ هِجْرَتُهُ إِلَى اللَّهِ وَرَسُولِهِ فَهِجْرَتُهُ إِلَى اللَّهِ وَرَسُولِهِ، وَمَنْ كَانَتْ هِجْرَتُهُ إِلَى الدُّنْيَا يُصِيبُهَا أَوْ إِلَى امْرَأَةٍ يَنْكِحُهَا فَهِجْرَتُهُ إِلَى مَا هَاجَرَ إِلَيْهِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 التبيان في آداب حملة القرآن - الإمام النووي:</span> الإخلاص شرط أساسي لقبول حفظ القرآن وتلاوته، فمن نوى بصدق كُتب له أجر الحافظ كاملاً وإن توفي قبل إتمامه ببركة نيته الصادقة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 جامع العلوم والحكم - ابن رجب الحنبلي:</span> النية الصالحة تحول سائر الأعمال إلى قربات، ومن قرأ القرآن رياءً أو سمعة كان أول من تسعر به النار يوم القيامة والعياذ بالله.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 2/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 2، مسلم: 797)</span>
+        </div>
+        <div class="hadith-title">كَيْفِيَّةُ نُزُولِ الوَحْيِ الشَّرِيفِ عَلَى النَّبِيِّ ﷺ</div>
+        <div class="hadith-narrator">عن عائشة أم المؤمنين رضي الله عنها أن الحارث بن هشام رضي الله عنه سأل رسول الله صلى الله عليه وسلم فقال: يا رسول الله، كيف يأتيك الوحي؟ فقال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«أَحْيَانًا يَأْتِينِي مِثْلَ صَلْصَلَةِ الْجَرَسِ، وَهُوَ أَشَدُّهُ عَلَيَّ، فَيُفْصَمُ عَنِّي وَقَدْ وَعَيْتُ عَنْهُ مَا قَالَ، وَأَحْيَانًا يَتَمَثَّلُ لِيَ الْمَلَكُ رَجُلًا فَيُكَلِّمُنِي فَأَعِي مَا يَقُولُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> نزول الوحي بصوت مثل صلصلة الجرس كان أشد الأحوال على النبي ﷺ لثقل الوحي وهيبته، حتى يتفصد جبينه عرقاً في اليوم الشديد البرد.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 الإتقان في علوم القرآن - الإمام السيوطي:</span> بيان مراتب نزول الوحي وعظمة كلام الله المنزّل على قلب المصطفى ﷺ.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 3/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5022، مسلم: 1637)</span>
+        </div>
+        <div class="hadith-title">وَصِيَّةُ النَّبِيِّ ﷺ الخَالِدَةُ بِكِتَابِ اللَّهِ عَزَّ وَجَلَّ</div>
+        <div class="hadith-narrator">عن طلحة بن مصرف قال: سألت عبد الله بن أبي أوفى رضي الله عنهما: هل كان النبي صلى الله عليه وسلم أوصى؟ فقال: لا، فقلت: كيف كُتب على الناس الوصية أو أُمِروا بها ولم يوصِ؟ قال:</div>
+        <div class="hadith-text">«أَوْصَى بِكِتَابِ اللَّهِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> اقتصار النبي ﷺ على الوصية بكتاب الله لأنه جامع لكل أصول الدين وفروعه، فمن استمسك بالقرآن فقد حفظ الدين كله.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> الاستمساك بالقرآن والعمل بمحكمه هو الوصية العظمى لرسول الله ﷺ لأمته.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 4/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2925، أحمد: 14460)</span>
+        </div>
+        <div class="hadith-title">القُرْآنُ كَلَامُ اللَّهِ تَعَالَى وَبَذْلُ النَّفْسِ فِي تَبْلِيغِهِ</div>
+        <div class="hadith-narrator">عن جابر بن عبدالله رضي الله عنهما قال: كان النبي صلى الله عليه وسلم يعرض نفسه على الناس في الموقف فيقول:</div>
+        <div class="hadith-text">«أَلَا رَجُلٌ يَحْمِلُنِي إِلَى قَوْمِهِ؟ فَإِنَّ قُرَيْشًا قَدْ مَنَعُونِي أَنْ أُبَلِّغَ كَلَامَ رَبِّي»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 مجموع الفتاوى - الإمام ابن تيمية:</span> القرآن كلام الله حقيقة، منزل غير مخلوق، منه بدأ وإليه يعود، تكلم الله به بحرف وصوت سمعه جبريل عليه السلام.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 السيرة النبوية - الحافظ ابن كثير:</span> عظمة صبر النبي ﷺ في تبليغ كلام ربه وعرض نفسه على القبائل في المواسم حتى مكن الله لدينه.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 5/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 4991، مسلم: 819)</span>
+        </div>
+        <div class="hadith-title">رُخْصَةُ نُزُولِ القُرْآنِ عَلَى سَبْعَةِ أَحْرُفٍ تَيْسِيرًا وَتَوْسِعَةً</div>
+        <div class="hadith-narrator">عن ابن عباس رضي الله عنهما أن رسول الله صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«أَقْرَأَنِي جِبْرِيلُ عَلَى حَرْفٍ فَرَاجَعْتُهُ، فَلَمْ أَسْتَزِيدُهُ حَتَّى انْتَهَى إِلَى سَبْعَةِ أَحْرُفٍ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 الوافي في شرح الشاطبية - الشيخ عبد الغني القاضي:</span> الأحرف السبعة هي أوجه التغاير الصوتية والصرفية والإعرابية التي رخصت للأمة تيسيراً، ولا تضاد بينها بل يصدق بعضها بعضاً.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 النشر في القراءات العشر - الإمام ابن الجزري:</span> تواتر القراءات القرآنية واستنادها إلى الأحرف السبعة المحفوظة في مصاحف الصحابة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 6/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5020، مسلم: 797)</span>
+        </div>
+        <div class="hadith-title">مَثَلُ المُؤْمِنِ الَّذِي يَقْرَأُ القُرْآنَ وَمَثَلُ غَيْرِهِ (حَدِيثُ الأُتْرُجَّةِ)</div>
+        <div class="hadith-narrator">عن أبي موسى الأشعري رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«مَثَلُ الْمُؤْمِنِ الَّذِي يَقْرَأُ الْقُرْآنَ كَمَثَلِ الْأُتْرُجَّةِ، رِيحُهَا طَيِّبٌ وَطَعْمُهَا طَيِّبٌ، وَمَثَلُ الْمُؤْمِنِ الَّذِي لَا يَقْرَأُ الْقُرْآنَ كَمَثَلِ التَّمْرَةِ، لَا رِيحَ لَهَا وَطَعْمُهَا حُلْوٌ، وَمَثَلُ الْمُنَافِقِ الَّذِي يَقْرَأُ الْقُرْآنَ كَمَثَلِ الرَّيْحَانَةِ، رِيحُهَا طَيِّبٌ وَطَعْمُهَا مُرٌّ، وَمَثَلُ الْمُنَافِقِ الَّذِي لَا يَقْرَأُ الْقُرْآنَ كَمَثَلِ الْحَنْظَلَةِ، لَيْسَ لَهَا رِيحٌ وَطَعْمُهَا مُرٌّ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> ضرب النبي ﷺ المثل بالأترجة لجامع طيب ريحها ولذة طعمها وعظم نفعها، وهكذا المؤمن القارئ للقرآن نافع لنفسه ومؤثر بعبيره في مجتمعه.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح رياض الصالحين - الشيخ ابن عثيمين:</span> التقسيم الرباعي في الحديث يبين أن شرف المؤمن بكمال إيمانه وتلاوته لكتاب ربه.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 7/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه البخاري (البخاري: 5027)</span>
+        </div>
+        <div class="hadith-title">خَيْرِيَّةُ الأُمَّةِ فِي تَعَلُّمِ القُرْآنِ وَتَعْلِيمِهِ</div>
+        <div class="hadith-narrator">عن عثمان بن عفان رضي الله عنه عن النبي صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> تأكيد فضل معلمي حلقات القرآن وحفاظه في سائر العصور، وأنهم خير الناس رتبة عند الله.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح رياض الصالحين - الشيخ ابن عثيمين:</span> التعليم يشمل تعليم التجويد والرسم ومعاني التفسير وأحكام التلاوة والعمل بها.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 8/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه البخاري (البخاري: 5035)</span>
+        </div>
+        <div class="hadith-title">اسْتِحْبَابُ تَعْلِيمِ القُرْآنِ وَتَحْفِيظِهِ لِلصِّبْيَانِ فِي الصِّغَرِ</div>
+        <div class="hadith-narrator">عن سعيد بن جبير قال: قال عبدالله بن عباس رضي الله عنهما:</div>
+        <div class="hadith-text">«تُوُفِّيَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَأَنَا ابْنُ عَشْرِ سِنِينَ، وَقَدْ قَرَأْتُ الْمُحْكَمَ»، فَقُلْتُ لَهُ: وَمَا الْمُحْكَمُ؟ قَالَ: «الْمُفَصَّلُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> فيه استحباب تعليم الصبيان القرآن وتحفيظهم في الصغر لسرعة حفظهم وجودة رسوخه في قلوبهم، والمحكم هو المفصل من سورة ق إلى آخر القرآن.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 التبيان - الإمام النووي:</span> العناية بالأطفال والناشئة في حلق التحفيظ سنة السلف الصالح وسبيل حفظ الهوية الإسلامية.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 9/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5000، مسلم: 2462)</span>
+        </div>
+        <div class="hadith-title">أَخْذُ القُرْآنِ مُشَافَهَةً وَتَلَقِّيًا عَنِ الشُّيُوخِ المُتْقِنِينَ</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه قال:</div>
+        <div class="hadith-text">«لَقَدْ أَخَذْتُ مِنْ فِي رَسُولِ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ بِضْعًا وَسَبْعِينَ سُورَةً، وَوَاللَّهِ لَقَدْ عَلِمَ أَصْحَابُ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ أَنِّي أَعْلَمُهُمْ بِكِتَابِ اللَّهِ، وَمَا أَنَا بِخَيْرِهِمْ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> أخذ ابن مسعود بضعاً وسبعين سورة من فم النبي ﷺ مشافهة دليل على أن التلقي والمشافهة ركن أصيل في نقل القرآن وضبط أدائه.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 منجد المقرئين - الإمام ابن الجزري:</span> القرآن لا يؤخذ من الصحف والمصاحف مجردة بل بالتلقي عن الشيوخ المسندين المتقنين.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 10/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5050، مسلم: 800)</span>
+        </div>
+        <div class="hadith-title">اسْتِحْبَابُ البُكَاءِ وَالخُشُوعِ عِنْدَ سَمَاعِ القُرْآنِ وَتَدَبُّرِهِ</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه قال: قال لي النبي صلى الله عليه وسلم: «اقرأ علي»، قلت: أقرأ عليك وعليك أنزل؟ قال: «فإني أحب أن أسمعه من غيري»، فقرأت سورة النساء حتى أتيت إلى هذه الآية: {فَكَيْفَ إِذَا جِئْنَا مِنْ كُلِّ أُمَّةٍ بِشَهِيدٍ وَجِئْنَا بِكَ عَلَى هَؤُلَاءِ شَهِيدًا} [النساء: 41]، قال:</div>
+        <div class="hadith-text">«حَسْبُكَ الآنَ»، فَالْتَفَتُّ إِلَيْهِ فَإِذَا عَيْنَاهُ تَذْرِفَانِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 التبيان في آداب حملة القرآن - الإمام النووي:</span> البكاء عند قراءة القرآن صفة العارفين وسنة النبيين والصالحين، ويتحقق بتدبر الوعيد والشهادة على الأمم وهيبة الموقف.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح البخاري - ابن بطال:</span> بكاء النبي ﷺ عند سماع الآية كان شفقة على أمته واستشعاراً لعظم أمانة الرسالة والشهادة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 11/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه البخاري (البخاري: 5046)</span>
+        </div>
+        <div class="hadith-title">صِفَةُ قِرَاءَةِ النَّبِيِّ ﷺ وَسُنَّةُ المَدِّ وَالتَّرْتِيلِ</div>
+        <div class="hadith-narrator">سئل أنس بن مالك رضي الله عنه: كَيْفَ كَانَتْ قِرَاءَةُ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ؟ فَقَالَ:</div>
+        <div class="hadith-text">«كَانَتْ مَدًّا»، ثُمَّ قَرَأَ: {بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ}، يَمُدُّ بِبِسْمِ اللَّهِ، وَيَمُدُّ بِالرَّحْمَنِ، وَيَمُدُّ بِالرَّحِيمِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> المد في التلاوة سنة متواترة تعين على التمهل والتدبر وتمنع الهذرمة والعجلة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 التحديد في الإتقان والتجويد - الإمام الداني:</span> صفة قراءة النبي ﷺ كانت مرتلة ممدودة الحروف عند حروف المد واللين تحقيقاً للترتيل المأمور به.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 12/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه النسائي (النسائي: 921، أبو داود: 604)</span>
+        </div>
+        <div class="hadith-title">وُجُوبُ الإِنْصَاتِ وَالاسْتِمَاعِ لِقِرَاءَةِ الإِمَامِ فِي الصَّلَاةِ</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«إِنَّمَا جُعِلَ الْإِمَامُ لِيُؤْتَمَّ بِهِ، فَإِذَا كَبَّرَ فَكَبِّرُوا، وَإِذَا قَرَأَ فَأَنْصِتُوا»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 نيل الأوطار - الإمام الشوكاني:</span> وجوب الإنصات والاستماع لقراءة الإمام في الصلاة الجهرية تعظيماً لكلام الله وتحصيلاً للتدبر.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتاوى نور على الدرب - الشيخ ابن باز:</span> الإنصات لكلام الله أدب واجب في الصلاة ومستحب خارجها لنيل رحمة الله: {وَإِذَا قُرِئَ الْقُرْآنُ فَاسْتَمِعُوا لَهُ وَأَنصِتُوا لَعَلَّكُمْ تُرْحَمُونَ}.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 13/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5024، مسلم: 792)</span>
+        </div>
+        <div class="hadith-title">اسْتِحْبَابُ تَحْسِينِ الصَّوْتِ بِالقُرْآنِ وَالجَهْرِ بِهِ خُشُوعًا</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه قال: سمعت رسول الله صلى الله عليه وسلم يقول:</div>
+        <div class="hadith-text">«مَا أَذِنَ اللَّهُ لِشَيْءٍ مَا أَذِنَ لِنَبِيٍّ حَسَنِ الصَّوْتِ يَتَغَنَّى بِالْقُرْآنِ يَجْهَرُ بِهِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> أذن الله: أي استمع استماع رضا وقبول وإثابة، وفيه استحباب تحسين الصوت بالقراءة والجهر بها بحضور قلب وخشوع.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> فضل الصوت الحسن المخشّع في تلاوة كتاب الله وأثره في استجلاب الخشية.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 14/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه ابن ماجه (ابن ماجه: 1339)</span>
+        </div>
+        <div class="hadith-title">صِفَةُ أَحْسَنِ النَّاسِ صَوْتًا بِالقُرْآنِ بِالخَشْيَةِ وَالتَّدَبُّرِ</div>
+        <div class="hadith-narrator">عن جابر بن عبدالله رضي الله عنهما قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«إِنَّ مِنْ أَحْسَنِ النَّاسِ صَوْتًا بِالْقُرْآنِ، الَّذِي إِذَا سَمِعْتُمُوهُ يَقْرَأُ حَسِبْتُمُوهُ يَخْشَى اللَّهَ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فيض القدير - الحافظ المناوي:</span> أحسن الأصوات بالقرآن ليس مجرد التطريب، بل الصوت الذي يظهر فيه أثر الخشية والهيبة من كلام الله فيورث السامع خشوعاً ورقة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 بهجة قلوب الأبرار - الشيخ السعدي:</span> الخشوع والتدبر هما الغاية العظمى والمقصود الأسمى من ترتيل القرآن.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 15/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه مسلم (مسلم: 2699)</span>
+        </div>
+        <div class="hadith-title">فَضْلُ اجْتِمَاعِ حَلَقَاتِ القُرْآنِ فِي المَسَاجِدِ وَتَنَزُّلُ السَّكِينَةِ</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«مَا اجْتَمَعَ قَوْمٌ فِي بَيْتٍ مِنْ بُيُوتِ اللَّهِ يَتْلُونَ كِتَابَ اللَّهِ وَيَتَدَارَسُونَهُ بَيْنَهُمْ، إِلَّا نَزَلَتْ عَلَيْهِمِ السَّكِينَةُ، وَغَشِيَتْهُمُ الرَّحْمَةُ، وَحَفَّتْهُمُ الْمَلَائِكَةُ، وَذَكَرَهُمُ اللَّهُ فِيمَنْ عِنْدَهُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> فيه فضل مجالس القرآن وحلقات التحفيظ والتدارس في المساجد، وأنها مهبط السكينة والرحمة ومحط الملائكة الكرام ومباهاة الله بأهلها.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 مدارج السالكين - الإمام ابن القيم:</span> السكينة طمأنينة ووقار يقذفه الله في قلوب أهل القرآن يثبتهم ويملأ أرواحهم نوراً وأُنساً.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 16/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه أبو داود (أبو داود: 1333)</span>
+        </div>
+        <div class="hadith-title">النَّهْيُ عَنِ التَّشْوِيشِ عَلَى المُصَلِّينَ بِرَفْعِ الصَّوْتِ بِالقِرَاءَةِ فِي المَسْجِدِ</div>
+        <div class="hadith-narrator">عن أبي سعيد الخدري رضي الله عنه قال: اعتكف رسول الله صلى الله عليه وسلم في المسجد فسمعهم يجهرون بالقراءة فكشف الستر وقال:</div>
+        <div class="hadith-text">«أَلَا إِنَّ كُلَّكُمْ مُنَاجٍ رَبَّهُ، فَلَا يُؤْذِيَنَّ بَعْضُكُمْ بَعْضًا، وَلَا يَرْفَعْ بَعْضُكُمْ عَلَى بَعْضٍ فِي الْقِرَاءَةِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 عون المعبود - العلامة شمس الحق العظيم آبادي:</span> النهي عن الجهر بالقراءة في المسجد إذا كان يشوش على المصلين أو القارئين الآخرين، فكل مصلٍ يناجي ربه.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 الشرح الممتع - الشيخ ابن عثيمين:</span> الأدب في بيوت الله ألا يشوش مسلم على أخيه بتلاوة أو ذكر جاهر.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 17/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2910)</span>
+        </div>
+        <div class="hadith-title">مُضَاعَفَةُ الحَسَنَاتِ بِكُلِّ حَرْفٍ مِنَ القُرْآنِ بِعَشْرِ أَمْثَالِهَا</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ، وَالْحَسَنَةُ بِعَشْرِ أَمْثَالِهَا، لَا أَقُولُ الم حَرْفٌ، وَلَكِنْ أَلِفٌ حَرْفٌ وَلَامٌ حَرْفٌ وَمِيمٌ حَرْفٌ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> فضل الله واسع، فالحرف الواحد بحسنة والحسنة بعشر أمثالها، وكل حرف مستقل في احتساب الأجر كالألف واللام والميم.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح رياض الصالحين - الشيخ ابن عثيمين:</span> القرآن أكثر الكتب ثواباً في التلاوة حيث يحصل القارئ على آلاف الحسنات المضاعفة في دقائق يسيرة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 18/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5031، مسلم: 789)</span>
+        </div>
+        <div class="hadith-title">مَثَلُ صَاحِبِ القُرْآنِ وَسُرْعَةُ تَفَلُّتِهِ كَالإِبِلِ المُعَقَّلَةِ</div>
+        <div class="hadith-narrator">عن عبدالله بن عمر رضي الله عنهما أن رسول الله صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«إِنَّمَا مَثَلُ صَاحِبِ الْقُرْآنِ كَمَثَلِ صَاحِبِ الْإِبِلِ الْمُعَقَّلَةِ، إِنْ عَاهَدَ عَلَيْهَا أَمْسَكَهَا، وَإِنْ أَطْلَقَهَا ذَهَبَتْ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> تشبيه الحفظ برباط الإبل؛ فالإبل أسرع الحيوانات نفوراً إذا حلت عقالها، والقرآن أشد تفلتاً إذا أهمل الحافظ تعاهده وتكراره.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 التبيان - الإمام النووي:</span> وجوب تعاهد القرآن بالمراجعة اليومية المنتظمة لئلا يتعرض الحافظ للنسيان والإثم.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 19/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5032، مسلم: 790)</span>
+        </div>
+        <div class="hadith-title">الأَمْرُ بِاسْتِذْكَارِ القُرْآنِ وَالتَّحْذِيرُ الشَّدِيدُ مِنْ نِسْيَانِهِ</div>
+        <div class="hadith-narrator">عن عبدالله بن عمر رضي الله عنهما أن رسول الله صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«بِئْسَمَا لِأَحَدِهِمْ أَنْ يَقُولَ: نَسِيتُ آيَةَ كَيْتَ وَكَيْتَ، بَلْ هُوَ نُسِّيَ، وَاسْتَذْكَرُوا الْقُرْآنَ، فَإِنَّهُ أَشَدُّ تَفَصِّيًا مِنْ صُدُورِ الْرِّجَالِ مِنَ النَّعَمِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> الاستذكار هو استدامة المراجعة والتكرار، وأشد تفصياً أي أشد خروجاً وتفلتاً، وفيه التحذير الشديد من التهاون في مراجعة القرآن.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 الجامع لأحكام القرآن - الإمام القرطبي:</span> حرمة تعمد إهمال القرآن بعد حفظه والتهاون في حقوق مراجعته.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 20/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 4937، مسلم: 798)</span>
+        </div>
+        <div class="hadith-title">فَضْلُ المَاهِرِ بِالقُرْآنِ وَأَجْرُ المُتَتَعْتِعِ فِيهِ لِمَشَقَّتِهِ</div>
+        <div class="hadith-narrator">عن عائشة رضي الله عنها قالت: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«الْمَاهِرُ بِالْقُرْآنِ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ، وَالَّذِي يَقْرَأُ الْقُرْآنَ وَيَتَتَعْتَعُ فِيهِ وَهُوَ عَلَيْهِ شَاقٌّ لَهُ أَجْرَانِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> الماهر: الحاذق المتقن للتلاوة والحفظ معاً، ومرتبته مع الملائكة السفرة، والمتتعتع له أجران لبذله وسعه ومجاهدته.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 دليل الفالحين - ابن علان الصديقي:</span> بشارة عظيمة لكل طالب علم يجاهد نفسه في تصحيح التلاوة وتثبيت الحفظ.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 21/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه مسلم (مسلم: 772)</span>
+        </div>
+        <div class="hadith-title">سُنَّةُ التَّفَاعُلِ مَعَ آيَاتِ الرَّحْمَةِ وَالعَذَابِ وَالتَّسْبِيحِ فِي قِيَامِ اللَّيْلِ</div>
+        <div class="hadith-narrator">عن حذيفة بن اليمان رضي الله عنه قال: صليت مع النبي صلى الله عليه وسلم ذات ليلة:</div>
+        <div class="hadith-text">«أَنَّ النَّبِيَّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ كَانَ إِذَا مَرَّ بِآيَةٍ فِيهَا رَحْمَةٌ سَأَلَ، وَإِذَا مَرَّ بِآيَةٍ فِيهَا عَذَابٌ اسْتَجَارَ، وَإِذَا مَرَّ بِآيَةٍ فِيهَا تَنْزِيهٌ لِلَّهِ سَبَّحَ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> استحباب التفاعل مع الآيات في صلوات النوافل وقيام الليل بسؤال الرحمة عند آيات الوعد، والاستعاذة عند آيات الوعيد، والتسبيح عند آيات التنزيه.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 زاد المعاد - الإمام ابن القيم:</span> هدي النبي ﷺ في قيام الليل كان تدبراً حياً يناجي به ربه آية آية.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 22/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه ابن ماجه (ابن ماجه: 1350، النسائي: 1010)</span>
+        </div>
+        <div class="hadith-title">اسْتِحْبَابُ تَرْدِيدِ الآيَةِ فِي قِيَامِ اللَّيْلِ طَلَبًا لِلتَّدَبُّرِ</div>
+        <div class="hadith-narrator">عن أبي ذر رضي الله عنه قال:</div>
+        <div class="hadith-text">«قَامَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ بِآيَةٍ حَتَّى أَصْبَحَ يُرَدِّدُهَا، وَالْآيَةُ: {إِنْ تُعَذِّبْهُمْ فَإِنَّهُمْ عِبَادُكَ وَإِنْ تَغْفِرْ لَهُمْ فَإِنَّكَ أَنْتَ الْعَزِيزُ الْحَكِيمُ}»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 مفتاح دار السعادة - الإمام ابن القيم:</span> تكرار الآية الواحدة في قيام الليل يورث القلب فهماً عميقاً وخشوعاً لا يحصل بمجرد المرور السريع.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 حاشية السندي على سنن ابن ماجه:</span> ترديد النبي ﷺ لقوله تعالى: {إن تعذبهم فإنهم عبادك...} كان شفقة على أمته ورجاءً لمغفرة الله ورحمته لهم.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 23/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 775، مسلم: 822)</span>
+        </div>
+        <div class="hadith-title">جَوَازُ القِرَانِ بَيْنَ سُورَتَيْنِ مِنَ النَّظَائِرِ فِي الرَّكْعَةِ الوَاحِدَةِ</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه قال:</div>
+        <div class="hadith-text">«إِنِّى لأَعْرِفُ النَّظَائِرَ الَّتِي كَانَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ يَقْرُنُ بَيْنَهُنَّ: عِشْرِينَ سُورَةً فِي عَشْرِ رَكَعَاتٍ، سُورَتَيْنِ فِي كُلِّ رَكْعَةٍ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> النظائر هي السور المفصلة المتماثلة في المعاني والمواعظ، وكان النبي ﷺ يقرن بين سورتين منها في كل ركعة من صلاة الليل.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> جواز الجمع بين سورتين أو أكثر في ركعة واحدة في صلاة الفريضة والنافلة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 24/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه أبو داود (أبو داود: 1398)</span>
+        </div>
+        <div class="hadith-title">مَرَاتِبُ القَائِمِينَ بِالقُرْآنِ: النَّجَاةُ مِنَ الغَفْلَةِ، وَالقُنُوطُ، وَالقَنَاطِيرُ</div>
+        <div class="hadith-narrator">عن عبدالله بن عمرو بن العاص رضي الله عنهما قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«مَنْ قَامَ بِعَشْرِ آيَاتٍ لَمْ يُكْتَبْ مِنَ الْغَافِلِينَ، وَمَنْ قَامَ بِمِائَةِ آيَةٍ كُتِبَ مِنَ الْقَانِتِينَ، وَمَنْ قَامَ بِأَلْفِ آيَةٍ كُتِبَ مِنَ الْمُقَنْطِرِينَ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فيض القدير - الحافظ المناوي:</span> من قام بعشر آيات نجا من الغفلة، ومن قام بمائة كتب من القانتين المطيعين، ومن قام بألف آية (كجزءين من المفصل) كتب من المقنطرين الذين يعطون قناطير الأجر في الجنة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 عون المعبود - العظيم آبادي:</span> ترغيب النبي ﷺ في إحياء الليل بما تيسر من آيات القرآن الكريم.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 25/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه مسلم (مسلم: 802)</span>
+        </div>
+        <div class="hadith-title">عِظَمُ ثَوَابِ قِرَاءَةِ آيَاتِ القُرْآنِ دَاخِلَ الصَّلَاةِ</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«أَيُحِبُّ أَحَدُكُمْ إِذَا رَجَعَ إِلَى أَهْلِهِ أَنْ يَجِدَ فِيهِ ثَلَاثَ خَلِفَاتٍ عِظَامٍ سِمَانٍ؟» قُلْنَا: نَعَمْ، قَالَ: «فَثَلَاثُ آيَاتٍ يَقْرَأُ بِهِنَّ أَحَدُكُمْ فِي صَلَاتِهِ خَيْرٌ لَهُ مِنْ ثَلَاثِ خَلِفَاتٍ عِظَامٍ سِمَانٍ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> الخلفات العظام السمان من أنفس أموال العرب، وقراءة ثلاث آيات في الصلاة أعظم غنيمة وأبقى ثواباً من حطام الدنيا الزائل.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح رياض الصالحين - الشيخ ابن عثيمين:</span> قراءة القرآن داخل الصلاة أعظم أجراً من قراءته خارج الصلاة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 26/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 1013، مسلم: 865)</span>
+        </div>
+        <div class="hadith-title">سُجُودُ التِّلَاوَةِ فِي سُورَةِ النَّجْمِ وَعَاقِبَةُ المُسْتَكْبِرِ عَنِ السُّجُودِ</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه:</div>
+        <div class="hadith-text">«أَنَّ النَّبِيَّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ قَرَأَ {وَالنَّجْمِ} فَسَجَدَ فِيهَا، وَسَجَدَ مَنْ كَانَ مَعَهُ، غَيْرَ أَنَّ شَيْخًا أَخَذَ كَفًّا مِنْ حَصًى أَوْ تُرَابٍ، فَرَفَعَهُ إِلَى جَبْهَتِهِ وَقَالَ: يَكْفِينِي هَذَا. قَالَ عَبْدُ اللهِ: لَقَدْ رَأَيْتُهُ بَعْدُ قُتِلَ كَافِرًا»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> مشروعية سجود التلاوة في سورة النجم، وخضوع المسلمين والمشركين لهيبة القرآن عند نزولها.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> سجود التلاوة شكر لله وخضوع لأمره عند تلاوة آيات السجود.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 27/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5002، مسلم: 2463)</span>
+        </div>
+        <div class="hadith-title">سَعَةُ عِلْمِ ابْنِ مَسْعُودٍ بِأَسْبَابِ النُّزُولِ وَفَضْلُ الرِّحْلَةِ لِطَلَبِ القُرْآنِ</div>
+        <div class="hadith-narrator">عن عبدالله بن مسعود رضي الله عنه قال:</div>
+        <div class="hadith-text">«وَالَّذِي لَا إِلَهَ غَيْرُهُ، مَا أُنْزِلَتْ سُورَةٌ مِنْ كِتَابِ اللَّهِ إِلَّا وَأَنَا أَعْلَمُ أَيْنَ نُزِلَتْ، وَلَا أُنْزِلَتْ آيَةٌ مِنْ كِتَابِ اللَّهِ إِلَّا وَأَنَا أَعْلَمُ فِيمَنْ أُنْزِلَتْ، وَلَوْ أَعْلَمُ أَحَدًا أَعْلَمَ مِنِّي بِكِتَابِ اللَّهِ تَبْلُغُهُ الْإِبِلُ لَرَكِبْتُ إِلَيْهِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> تحدث ابن مسعود بنعمة الله عليه في حفظ القرآن ومعرفة أسباب نزوله ومكيه ومدنيه، وفيه فضل الترحال والطلب لأجل تعلم كتاب الله.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> منقبة جليلة لعبدالله بن مسعود رضي الله عنه وإمامته في التفسير وعلوم القرآن.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 28/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2914)</span>
+        </div>
+        <div class="hadith-title">إِلْبَاسُ صَاحِبِ القُرْآنِ تَاجَ وَحُلَّةَ الكَرَامَةِ يَوْمَ القِيَامَةِ</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه عن النبي صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«يَجِيءُ الْقُرْآنُ يَوْمَ الْقِيَامَةِ فَيَقُولُ: يَا رَبِّ حَلِّهِ، فَيُلْبَسُ تَاجَ الْكَرَامَةِ، ثُمَّ يَقُولُ: يَا رَبِّ زِدْهُ، فَيُلْبَسُ حُلَّةَ الْكَرَامَةِ، ثُمَّ يَقُولُ: يَا رَبِّ ارْضَ عَنْهُ، فَيُرْضَى عَنْهُ، وَيُقَالُ لَهُ: اقْرَأْ وَارْقَ، وَتُزَادُ بِكُلِّ آيَةٍ حَسَنَةً»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> شفاعة القرآن لصاحبه يوم القيامة حتى يلبسه الله تاج الكرامة وحلة الكرامة وينال رضا الله الذي لا سخط بعده.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فيض القدير - الحافظ المناوي:</span> إكرام الله لحافظ القرآن في المحشر برفع مكانته وإظهار شرفه أمام الخلائق.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 29/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5060، مسلم: 2667)</span>
+        </div>
+        <div class="hadith-title">النَّهْيُ عَنِ المِرَاءِ وَالجِدَالِ فِي القُرْآنِ وَالأَمْرُ بِالائْتِلَافِ عَلَيْهِ</div>
+        <div class="hadith-narrator">عن جندب بن عبدالله رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«اقْرَؤُوا الْقُرْآنَ مَا ائْتَلَفَتْ عَلَيْهِ قُلُوبُكُمْ، فَإِذَا اخْتَلَفْتُمْ فَقُومُوا عَنْهُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> النهي عن الجدال والمراء في القرآن الذي يوقع الشك والفرقة والعداوة، والأمر بالقيام عند وقوع النزاع المذموم.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> الاجتماع على القرآن والتآلف فيه بركة، والمراء فيه مفسدة للقلوب.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 30/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5058، مسلم: 1064)</span>
+        </div>
+        <div class="hadith-title">التَّحْذِيرُ مِنَ الرِّيَاءِ وَقِرَاءَةِ القُرْآنِ بِلَا فَهْمٍ وَلَا إِيمَانٍ</div>
+        <div class="hadith-narrator">عن أبي سعيد الخدري رضي الله عنه قال: سمعت رسول الله صلى الله عليه وسلم يقول:</div>
+        <div class="hadith-text">«يَخْرُجُ فِيكُمْ قومٌ تَحْقِرُونَ صَلَاتَكُمْ مَعَ صَلَاتِهِمْ، وَصِيَامَكُمْ مَعَ صِيَامِهِمْ، وَعَمَلَكُمْ مَعَ عَمَلِهِمْ، وَيَقْرَؤُونَ الْقُرْآنَ لَا يُجَاوِزُ حَنَاجِرَهُمْ، يَمْرُقُونَ مِنَ الدِّينِ كَمَا يَمْرُقُ السَّهْمُ مِنَ الرَّمِيَّةِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> التحذير من الغلو والرياء، وقراءة القرآن بالألسنة دون أن يصل الإيمان إلى القلوب أو ينعكس على العمل.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> القرآن إنما نزل للعمل والتدبر والاتباع، لا لمجرد التظاهر والمباهاة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 31/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2917)</span>
+        </div>
+        <div class="hadith-title">النَّهْيُ عَنِ التَّكَسُّبِ بِالقُرْآنِ وَسُؤَالِ النَّاسِ بِهِ</div>
+        <div class="hadith-narrator">عن عمران بن حصين رضي الله عنه أنه مر على قارئ يقرأ ثم سأل فاسترجع، ثم قال: سمعت رسول الله صلى الله عليه وسلم يقول:</div>
+        <div class="hadith-text">«مَنْ قَرَأَ الْقُرْآنَ فَلْيَسْأَلِ اللَّهَ بِهِ، فَإِنَّهُ سَيَجِيءُ أَقْوَامٌ يَقْرَؤُونَ الْقُرْآنَ يَسْأَلُونَ بِهِ النَّاسَ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> النهي عن التكسب بالقرآن وجعله وسيلة لجمع الأموال من الناس، والأمر بسؤال الله وحده الأجر والثواب والجنة بتلاوته.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فيض القدير - الحافظ المناوي:</span> القرآن عبادة شريفة لا يجوز ابتذالها في الأغراض الدنيوية الفانية.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 32/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2875)</span>
+        </div>
+        <div class="hadith-title">عَظَمَةُ سُورَةِ الفَاتِحَةِ وَأَنَّهَا لَمْ يَنْزِلْ مِثْلُهَا فِي التَّوْرَاةِ وَلَا الإِنْجِيلِ</div>
+        <div class="hadith-narrator">عن أبي بن كعب رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«مَا أَنْزَلَ اللَّهُ فِي التَّوْرَاةِ وَلَا فِي الْإِنْجِيلِ مِثْلَ أُمِّ الْقُرْآنِ، وَهِيَ السَّبْعُ الْمَثَانِي، وَهِيَ الْمَقْسُومَةُ بَيْنِي وَبَيْنَ عَبْدِي، وَلِعَبْدِي مَا سَأَلَ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> الفاتحة أفضل سور الكتب المنزلة، وهي مقسومة بين الله وعبده نصفين: نصفها ثناء وتمجيد، ونصفها دعاء ورجاء.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 مدارج السالكين - الإمام ابن القيم:</span> اشتملت الفاتحة على جميع مقاصد القرآن وأسرار العبودية في {إياك نعبد وإياك نستعين}.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 33/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه مسلم (مسلم: 810)</span>
+        </div>
+        <div class="hadith-title">فَضْلُ آيَةِ الكُرْسِيِّ وَأَنَّهَا أَعْظَمُ آيَةٍ فِي كِتَابِ اللَّهِ</div>
+        <div class="hadith-narrator">عن أبي بن كعب رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم: «يا أبا المنذر، أتدري أي آية من كتاب الله معك أعظم؟» قال: قلت: الله ورسوله أعلم. قال: «يا أبا المنذر، أتدري أي آية من كتاب الله معك أعظم؟» قال: قلت:</div>
+        <div class="hadith-text">«{اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ}»، فضرب في صدري وقال: «وَاللَّهِ لِيَهْنِكَ الْعِلْمُ أَبَا الْمُنْذِرِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> آية الكرسي أعظم آية لاشتمالها على أمهات أسماء الله وصفاته: الحي، القيوم، العلي، العظيم، وإثبات علمه الشامل وقدرته التامة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تفسير القرآن العظيم - ابن كثير:</span> آية الكرسي حرز عظيم من الشيطان لمن قرأها في ليلته أو دبر كل صلاة.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 34/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه مسلم (مسلم: 780)</span>
+        </div>
+        <div class="hadith-title">قِرَاءَةُ سُورَةِ البَقَرَةِ فِي البُيُوتِ وَفِرَارُ الشَّيَاطِينِ مِنْهَا</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه أن رسول الله صلى الله عليه وسلم قال:</div>
+        <div class="hadith-text">«لَا تَجْعَلُوا بُيُوتَكُمْ مَقَابِرَ، إِنَّ الشَّيْطَانَ يَنْفِرُ مِنَ الْبَيْتِ الَّذِي تُقْرَأُ فِيهِ سُورَةُ الْبَقَرَةِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> قراءة سورة البقرة في البيوت تطرد الشياطين وتحفظ أهل البيت وتمنع تحول البيوت إلى مقابر خالية من الذكر.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح رياض الصالحين - الشيخ ابن عثيمين:</span> عمارة البيوت بالصلاة وقراءة القرآن وسورة البقرة بركة للأهل والذرية.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 35/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5011، مسلم: 795)</span>
+        </div>
+        <div class="hadith-title">تَنَزُّلُ السَّكِينَةِ وَالمَلَائِكَةِ لِقِرَاءَةِ سُورَةِ الكَهْفِ وَالقُرْآنِ</div>
+        <div class="hadith-narrator">عن البراء بن عازب رضي الله عنه قال: كان رجل يقرأ سورة الكهف وإلى جانبه حصان مربوط بشطنين فتغشته سحابة فجعلت تدنو وتدنو وجعل فرسه ينفر، فلما أصبح أتى النبي صلى الله عليه وسلم فذكر ذلك له فقال:</div>
+        <div class="hadith-text">«تِلْكَ السَّكِينَةُ تَنَزَّلَتْ بِالْقُرْآنِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> السكينة: الملائكة والطمأنينة التي تنزل لقراءة القرآن وتدنو حتى يراها القارئ كالسحابة المضيئة.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> كرامة عظيمة لأهل القرآن وتنزل الملائكة استماعاً لتلاوة سورة الكهف.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 36/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه البخاري (البخاري: 5013)</span>
+        </div>
+        <div class="hadith-title">فَضْلُ سُورَةِ الإِخْلَاصِ وَاشْتِمَالُهَا عَلَى تَوْحِيدِ الصَّمَدِ</div>
+        <div class="hadith-narrator">عن أبي سعيد الخدري رضي الله عنه قال: قال النبي صلى الله عليه وسلم لأصحابه: «أيعجز أحدكم أن يقرأ ثلث القرآن في ليلة؟» فشق ذلك عليهم وقالوا: أينا يطيق ذلك يا رسول الله؟ فقال:</div>
+        <div class="hadith-text">«{اللَّهُ الْوَاحِدُ الصَّمَدُ} ثُلُثُ الْقُرْآنِ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> سورة الإخلاص ثلث القرآن لأن علوم القرآن ثلاثة: توحيد وأحكام وقصص، وهي أخلصت للتوحيد المحض.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 زاد المعاد - الإمام ابن القيم:</span> محبة سورة الإخلاص وعظيم شأنها في نفي الشريك والولد والند عن الله سبحانه وتعالى.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 37/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2875)</span>
+        </div>
+        <div class="hadith-title">مَحَبَّةُ سُورَةِ الإِخْلَاصِ سَبَبٌ مُوجِبٌ لِدُخُولِ الجَنَّةِ</div>
+        <div class="hadith-narrator">عن أبي هريرة رضي الله عنه قال: أقبلت مع رسول الله صلى الله عليه وسلم فسمع رجلاً يقرأ {قل هو الله أحد} فقال رسول الله صلى الله عليه وسلم: «وَجَبَتْ»، فسألته: ماذا يا رسول الله؟ قال:</div>
+        <div class="hadith-text">«الْجَنَّةُ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> محبة سورة الإخلاص وتكرارها حباً في صفة الرحمن يوجب لصاحبها دخول الجنة ومغفرة الذنوب.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فضائل القرآن - الحافظ ابن كثير:</span> حب صفة الله وتوحيده هو أعظم أسباب الفوز برضوانه وجنته.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 38/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه الترمذي (الترمذي: 2903، أبو داود: 1523)</span>
+        </div>
+        <div class="hadith-title">اسْتِحْبَابُ قِرَاءَةِ المُعَوِّذَاتِ دُبُرَ كُلِّ صَلَاةٍ مَكْتُوبَةٍ</div>
+        <div class="hadith-narrator">عن عقبة بن عامر رضي الله عنه قال:</div>
+        <div class="hadith-text">«أَمَرَني رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ أَنْ أَقْرَأَ بِالْمُعَوِّذَاتِ دُبُرَ كُلِّ صَلَاةٍ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 تحفة الأحوذي - المباركفوري:</span> استحباب قراءة المعوذات الثلاث (الإخلاص والفلق والناس) عقب كل صلاة مكتوبة لحفظ العبد وتحصينه.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 مجموع فتاوى الشيخ ابن باز:</span> تقرأ المعوذات مرة بعد الظهر والعصر والعشاء، وثلاث مرات بعد الفجر والمغرب.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 39/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">رواه البخاري (البخاري: 5017)</span>
+        </div>
+        <div class="hadith-title">سُنَّةُ النَّفْثِ وَمَسْحِ الجَسَدِ بِالمُعَوِّذَاتِ الثَّلَاثِ عِنْدَ النَّوْمِ</div>
+        <div class="hadith-narrator">عن عائشة رضي الله عنها أن النبي صلى الله عليه وسلم كان إذا أوى إلى فراشه كل ليلة:</div>
+        <div class="hadith-text">«جَمَعَ كَفَّيْهِ ثُمَّ نَفَثَ فِيهِمَا فَقَرَأَ فِيهِمَا: {قُلْ هُوَ اللَّهُ أَحَدٌ} وَ{قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ} وَ{قُلْ أَعُوذُ بِرَبِّ النَّاسِ}، ثُمَّ يَمْسَحُ بِهِمَا مَا اسْتَطَاعَ مِنْ جَسَدِهِ، يَبْدَأُ بِهِمَا عَلَى رَأْسِهِ وَوَجْهِهِ وَمَا أَقْبَلَ مِنْ جَسَدِهِ، يَفْعَلُ ذَلِكَ ثَلَاثَ مَرَّاتٍ»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> النفث: نفخ لطيف بلا ريق، ومسح الجسد بهما ثلاث مرات سنة نبوية مؤكدة لحفظ البدن والروح من الشياطين والشرور.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 الأذكار - الإمام النووي:</span> المعوذات الثلاث أعظم حصن للمسلم عند نومه.</div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-header">
+            <div>
+                <span class="hadith-number">الحديث 40/2</span>
+                <span class="hadith-part-tag">الجزء الثاني</span>
+            </div>
+            <span class="hadith-source-badge">متفق عليه (البخاري: 5016)</span>
+        </div>
+        <div class="hadith-title">مَشْرُوعِيَّةُ الرُّقْيَةِ وَالاسْتِشْفَاءِ بِالمُعَوِّذَاتِ وَالمَسْحِ عِنْدَ المَرَضِ</div>
+        <div class="hadith-narrator">عن عائشة رضي الله عنها أن رسول الله صلى الله عليه وسلم:</div>
+        <div class="hadith-text">«كَانَ إِذَا اشْتَكَى يَقْرَأُ عَلَى نَفْسِهِ بِالْمُعَوِّذَاتِ وَيَنْفُثُ، فَلَمَّا اشْتَدَّ وَجَعُهُ كُنْتُ أَقْرَأُ عَلَيْهِ وَأَمْسَحُ بِيَدِهِ رَجَاءَ بَرَكَتِهَا»</div>
+        <div class="footnotes-section">
+            <div class="footnotes-header">الحواشي والتعليقات المعتمدة:</div>
+            <div class="footnote-item"><span class="footnote-source">📖 فتح الباري - الحافظ ابن حجر:</span> مشروعية الرقية الشرعية بالمعوذات عند المرض والوجع، والمسح باليد رجاء بركتها وشفائها.</div>
+            <div class="footnote-item"><span class="footnote-source">📖 شرح صحيح مسلم - الإمام النووي:</span> الاستشفاء بكلام الله وسنة النبي ﷺ من أعظم أسباب الشفاء الحسي والمعنوي.</div>
+        </div>
+    </div>
+
+    <div class="page-break">
+        <h1 class="section-title">خاتمة الجزء الثاني وخاتمة الكتاب كاملاً</h1>
+        <div class="section-subtitle">كلمة الختام والدعاء بتمام ثمانين حديثاً شريفاً</div>
+        <div class="preface-text">ما شاء الله لا قوة إلا بالله، والحمد لله الذي بنعمته تتم الصالحات، وبتوفيقه تُنال الرغائب وتُستكمل الغايات.<br><br>بهذا الحديث المبارك في الرقية بالمعوذات ومسح الجسد بها رجاء بركتها نكون قد استوفينا بحمد الله تعالى ثمانين حديثاً نبوياً شريفاً من أصح ما ورد عن رسول الله ﷺ في فضائل القرآن الكريم، وآداب حملته، وأسرار تلاوته، وخواص سوره وآياته؛ أربعون منها في الجزء الأول، وأربعون في هذا الجزء الثاني.<br><br>فنسأل الله العظيم أن يجعل القرآن العظيم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا وغمومنا، وأن يجعله شفيعاً وحجة لنا لا علينا يوم القيامة.<br><br>سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك.<br>وصلى الله وسلم وبارك على نبينا محمد، وعلى آله وصحبه أجمعين، والحمد لله رب العالمين.<br><br><strong>ويليه الجزء الثالث إن شاء الله تعالى.</strong><br><br>إبراهيم شريف أبوبكر<br>مدير مركز عبدالله بن مسعود لتحفيظ القرآن والدراسات الإسلامية<br>تَمِينْ نَيْئًا — كدونا، نيجيريا.</div>
+    </div>
+    <div class="page-break">
+        <h1 class="section-title">أهم المراجع والمصادر العامة (Bibliography)</h1>
+        <div class="section-subtitle">المصادر والكتب المعتمدة عند أهل السنة والجماعة في تحقيق وشرح وحواشي أحاديث السلسلة</div>
+        <div class="preface-text">
+            <strong>أولاً: أمهات كتب الحديث المسندة:</strong><br>
+            • <strong>القرآن الكريم</strong> (كلام الله المعجز المنزّل على نبيه ﷺ).<br>
+            • <strong>صحيح البخاري</strong> (الجامع المسند الصحيح المختصر) — الإمام محمد بن إسماعيل البخاري (ت ٢٥٦ هـ)<br>
+            • <strong>صحيح مسلم</strong> (المسند الصحيح المختصر) — الإمام مسلم بن الحجاج النيسابوري (ت ٢٦١ هـ)<br>
+            • <strong>سنن أبي داود</strong> — الإمام سليمان بن الأشعث السجستاني (ت ٢٧٥ هـ)<br>
+            • <strong>جامع الترمذي</strong> (السنن) — الإمام محمد بن عيسى الترمذي (ت ٢٧٩ هـ)<br>
+            • <strong>سنن النسائي</strong> (المجتبى) — الإمام أحمد بن شعيب النسائي (ت ٣٠٣ هـ)<br>
+            • <strong>سنن ابن ماجه</strong> — الإمام محمد بن يزيد القزويني (ت ٢٧٥ هـ)<br>
+            • <strong>مسند الإمام أحمد بن حنبل</strong> — إمام أهل السنة أحمد بن حنبل الشيباني (ت ٢٤١ هـ)<br>
+            • <strong>موطأ الإمام مالك</strong> — إمام دار الهجرة مالك بن أنس الأصبحي (ت ١٧٩ هـ)<br>
+            • <strong>سنن الدارمي</strong> — الإمام عبد الله بن عبد الرحمن الدارمي (ت ٢٥٥ هـ)<br>
+            • <strong>صحيح الجامع الصغير وسلسلة الأحاديث الصحيحة</strong> — العلامة محمد ناصر الدين الألباني (ت ١٤٢٠ هـ)<br><br>
+            <strong>ثانياً: شروح الحديث النبوي المعتمدة:</strong><br>
+            • <strong>فتح الباري شرح صحيح البخاري</strong> — الحافظ أحمد بن علي بن حجر العسقلاني (ت ٨٥٢ هـ)<br>
+            • <strong>المنهاج شرح صحيح مسلم بن الحجاج</strong> — الإمام محيي الدين يحيى بن شرف النووي (ت ٦٧٦ هـ)<br>
+            • <strong>جامع العلوم والحكم في شرح خمسين حديثاً</strong> — الحافظ زين الدين ابن رجب الحنبلي (ت ٧٩٥ هـ)<br>
+            • <strong>لطائف المعارف فيما لمواسم العام من الوظائف</strong> — الحافظ زين الدين ابن رجب الحنبلي (ت ٧٩٥ هـ)<br>
+            • <strong>تحفة الأحوذي بشرح جامع الترمذي</strong> — العلامة محمد عبد الرحمن المباركفوري (ت ١٣٥٣ هـ)<br>
+            • <strong>عون المعبود شرح سنن أبي داود</strong> — العلامة محمد أشرف شمس الحق العظيم آبادي (ت ١٣٢٩ هـ)<br>
+            • <strong>فيض القدير شرح الجامع الصغير</strong> — الحافظ زين الدين محمد عبد الرؤوف المناوي (ت ١٠٣١ هـ)<br>
+            • <strong>شرح رياض الصالحين</strong> — فضيلة الشيخ محمد بن صالح العثيمين (ت ١٤٢١ هـ)<br>
+            • <strong>دليل الفالحين لطرق رياض الصالحين</strong> — الشيخ محمد بن علان الصديقي الشافعي (ت ١٠٥٧ هـ)<br>
+            • <strong>التمهيد لما في الموطأ من المعاني والأسانيد</strong> — الإمام ابن عبد البر القرطبي (ت ٤٦٣ هـ)<br>
+            • <strong>المجموع شرح المهذب</strong> — الإمام محيي الدين يحيى بن شرف النووي (ت ٦٧٦ هـ)<br>
+            • <strong>الشرح الممتع على زاد المستقنع</strong> — فضيلة الشيخ محمد بن صالح العثيمين (ت ١٤٢١ هـ)<br>
+            • <strong>شرح صحيح البخاري</strong> — الإمام ابن بطال القرطبي (ت ٤٤٩ هـ)<br>
+            • <strong>نيل الأوطار من أسرار منتقى الأخبار</strong> — الإمام محمد بن علي الشوكاني (ت ١٢٥٠ هـ)<br>
+            • <strong>حاشية السندي على سنن ابن ماجه (كفاية الحاجة)</strong> — العلامة محمد بن عبد الهادي السندي (ت ١١٣٨ هـ)<br><br>
+            <strong>ثالثاً: كتب علوم القرآن والتفسير والقراءات:</strong><br>
+            • <strong>التبيان في آداب حملة القرآن</strong> — الإمام محيي الدين يحيى بن شرف النووي (ت ٦٧٦ هـ)<br>
+            • <strong>تفسير القرآن العظيم وفضائل القرآن</strong> — الحافظ عماد الدين إسماعيل بن كثير (ت ٧٧٤ هـ)<br>
+            • <strong>تيسير الكريم الرحمن في تفسير كلام المنان</strong> — العلامة عبد الرحمن بن ناصر السعدي (ت ١٣٧٦ هـ)<br>
+            • <strong>الجامع لأحكام القرآن (تفسير القرطبي)</strong> — الإمام أبو عبد الله محمد بن أحمد الأنصاري القرطبي (ت ٦٧١ هـ)<br>
+            • <strong>الإبانة عن معاني القراءات</strong> — الإمام مكي بن أبي طالب القيسي (ت ٤٣٧ هـ)<br>
+            • <strong>الوافي في شرح الشاطبية في القراءات السبع</strong> — فضيلة الشيخ عبد الفتاح القاضي (ت ١٤٠٣ هـ)<br>
+            • <strong>الفرائد الجليلة في شرح الدرر اللوامع في أصل مقرأ الإمام نافع</strong> — العلامة المحدث عبد الله بن فودي النيجيري (ت ١٢٤٥ هـ)<br>
+            • <strong>الإتقان في علوم القرآن</strong> — الحافظ جلال الدين عبد الرحمن السيوطي (ت ٩١١ هـ)<br>
+            • <strong>النشر في القراءات العشر ومنجد المقرئين</strong> — الإمام شمس الدين محمد بن الجزري (ت ٨٣٣ هـ)<br>
+            • <strong>التحديد في الإتقان والتجويد</strong> — الإمام أبو عمرو عثمان بن سعيد الداني (ت ٤٤٤ هـ)<br>
+            • <strong>حرز الأماني ووجه التهاني (الشاطبية)</strong> — الإمام القاسم بن فيرُّه الشاطبي (ت ٥٩٠ هـ)<br>
+            • <strong>شرح القواعد الحسان في تفسير القرآن</strong> — فضيلة الشيخ محمد بن صالح العثيمين (ت ١٤٢١ هـ)<br>
+            • <strong>بهجة قلوب الأبرار وقرة عيون الأخيار</strong> — العلامة عبد الرحمن بن ناصر السعدي (ت ١٣٧٦ هـ)<br>
+            • <strong>الواضح في علوم القرآن</strong> — فضيلة الشيخ د. مصطفى ديب البغا ود. محيي الدين مستو، ومصنفات الشيخ أبي رفيدة السلفي.<br><br>
+            <strong>رابعاً: كتب العقيدة وهدي السلف والرقائق والأذكار:</strong><br>
+            • <strong>جواب أهل العلم والإيمان بأن «قل هو الله أحد» تعدل ثلث القرآن ومجموع الفتاوى</strong> — شيخ الإسلام أحمد بن عبد الحليم بن تيمية (ت ٧٢٨ هـ)<br>
+            • <strong>زاد المعاد في هدي خير العباد</strong> — الإمام شمس الدين محمد بن أبي بكر بن قيم الجوزية (ت ٧٥١ هـ)<br>
+            • <strong>بدائع الفوائد ومدارج السالكين</strong> — الإمام شمس الدين محمد بن أبي بكر بن قيم الجوزية (ت ٧٥١ هـ)<br>
+            • <strong>إغاثة اللهفان من مصائد الشيطان ومفتاح دار السعادة</strong> — الإمام شمس الدين ابن قيم الجوزية (ت ٧٥١ هـ)<br>
+            • <strong>الأذكار المنتخبة من كلام سيد الأبرار</strong> — الإمام محيي الدين يحيى بن شرف النووي (ت ٦٧٦ هـ)<br>
+            • <strong>رياض الصالحين من كلام سيد المرسلين</strong> — الإمام محيي الدين يحيى بن شرف النووي (ت ٦٧٦ هـ)<br>
+            • <strong>الفصول في سيرة الرسول ﷺ والسيرة النبوية</strong> — الحافظ عماد الدين إسماعيل بن كثير (ت ٧٧٤ هـ)<br>
+            • <strong>مجموع فتاوى ومقالات متنوعة وفتاوى نور على الدرب</strong> — سماحة الشيخ عبد العزيز بن عبد الله بن باز (ت ١٤٢٠ هـ).
+        </div>
+    </div>
+</body>
+</html>
