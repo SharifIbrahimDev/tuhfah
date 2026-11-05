@@ -554,8 +554,8 @@ Future<Map<String, String>> getTodayHadithNotificationContent() async {
       final index = dayOfYear % jsonList.length;
       final hadith = jsonList[index] as Map<String, dynamic>;
       final id = (hadith['id'] as num?)?.toInt() ?? (index + 1);
-      final partNum = id <= 40 ? 1 : 2;
-      final numInPart = id <= 40 ? id : (id - 40);
+      final partNum = id <= 40 ? 1 : (id <= 80 ? 2 : 3);
+      final numInPart = id <= 40 ? id : (id <= 80 ? id - 40 : id - 80);
       final formattedId = '$numInPart/$partNum';
 
       final title = hadith['title'] ?? 'حديث اليوم';

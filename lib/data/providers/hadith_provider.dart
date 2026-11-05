@@ -137,9 +137,9 @@ final fontSizeProvider = StateNotifierProvider<FontSizeNotifier, double>((ref) {
 });
 
 // 8. BookSelection state manager
-enum BookSelection { part1, part2, all }
+enum BookSelection { part1, part2, part3, all }
 
-final bookSelectionProvider = StateProvider<BookSelection>((ref) => BookSelection.part1);
+final bookSelectionProvider = StateProvider<BookSelection>((ref) => BookSelection.all);
 
 // 9. FontFamily state manager
 class FontFamilyNotifier extends StateNotifier<String> {

@@ -31,10 +31,10 @@ class HadithModel {
     );
   }
 
-  /// Returns 1 for Hadiths 1-40 (Book 1), 2 for Hadiths 41-80 (Book 2), and 3 for Hadiths 81-131 (Book 3)
+  /// Returns 1 for Hadiths 1-40 (Book 1), 2 for Hadiths 41-80 (Book 2), and 3 for Hadiths 81-120 (Book 3)
   int get partNumber => id <= 40 ? 1 : (id <= 80 ? 2 : 3);
 
-  /// Returns 1..51 within its respective Part/Book
+  /// Returns 1..40 within its respective Part/Book
   int get numberInPart {
     if (id <= 40) return id;
     if (id <= 80) return id - 40;
