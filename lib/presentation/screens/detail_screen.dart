@@ -458,9 +458,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               _getHadithTextStyle(currentFontFamily, fontSize, bodyColor);
           final highlightBg =
               theme.colorScheme.secondary.withValues(alpha: 0.35);
-          final isPart1 = hadith.id <= 40;
-          final tagColor =
-              isPart1 ? theme.colorScheme.primary : theme.colorScheme.secondary;
+          final tagColor = hadith.partNumber == 1
+              ? theme.colorScheme.primary
+              : (hadith.partNumber == 2
+                  ? theme.colorScheme.secondary
+                  : const Color(0xFFD97706));
           final isAudioPlayingThis =
               audioState.isPlaying && audioState.currentHadithId == hadith.id;
 
@@ -527,9 +529,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                isPart1
+                                hadith.partNumber == 1
                                     ? 'الكتاب الأول: الجزء الأول'
-                                    : 'الكتاب الثاني: الجزء الثاني',
+                                    : (hadith.partNumber == 2
+                                        ? 'الكتاب الثاني: الجزء الثاني'
+                                        : 'الكتاب الثالث: الجزء الثالث'),
                                 style: GoogleFonts.tajawal(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,

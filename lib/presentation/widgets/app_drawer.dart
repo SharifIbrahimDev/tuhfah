@@ -151,7 +151,7 @@ class AppDrawer extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _StatChip(label: 'الأحاديث', value: '٨٠'),
+                      _StatChip(label: 'الأحاديث', value: '١٢٠'),
                       Container(height: 18, width: 1, color: Colors.white.withValues(alpha: 0.2)),
                       _StatChip(label: 'المفضلة', value: '${favoriteIds.length}'),
                       Container(height: 18, width: 1, color: Colors.white.withValues(alpha: 0.2)),
@@ -262,6 +262,30 @@ class AppDrawer extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const PdfViewerScreen(initialPart: 2)),
+                    );
+                  },
+                ),
+                _DrawerTile(
+                  title: 'قراءة الجزء الثالث (١/٣ — ٤٠/٣)',
+                  icon: Icons.menu_book_rounded,
+                  iconColor: const Color(0xFFD97706),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PdfViewerScreen(initialPart: 3)),
+                    );
+                  },
+                ),
+                _DrawerTile(
+                  title: 'قراءة الموسوعة الكاملة (١ — ١٢٠)',
+                  icon: Icons.auto_stories_rounded,
+                  iconColor: const Color(0xFF00897B),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PdfViewerScreen(initialPart: 0)),
                     );
                   },
                 ),

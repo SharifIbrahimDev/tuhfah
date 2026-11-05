@@ -14,6 +14,7 @@ enum QuizScope {
   all,
   part1,
   part2,
+  part3,
 }
 
 class QuizScreen extends ConsumerStatefulWidget {
@@ -46,7 +47,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (_selectedScope == QuizScope.part1) {
       pool = allHadiths.where((h) => h.id <= 40).toList();
     } else if (_selectedScope == QuizScope.part2) {
-      pool = allHadiths.where((h) => h.id > 40).toList();
+      pool = allHadiths.where((h) => h.id > 40 && h.id <= 80).toList();
+    } else if (_selectedScope == QuizScope.part3) {
+      pool = allHadiths.where((h) => h.id > 80).toList();
     }
 
     if (pool.isEmpty) return;
@@ -382,33 +385,50 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: _buildPillOption(
-                  title: 'الكتاب كاملاً (٨٠)',
-                  isSelected: _selectedScope == QuizScope.all,
-                  onTap: () => setState(() => _selectedScope = QuizScope.all),
-                  theme: theme,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildPillOption(
+                      title: 'الموسوعة كاملة (١٢٠)',
+                      isSelected: _selectedScope == QuizScope.all,
+                      onTap: () => setState(() => _selectedScope = QuizScope.all),
+                      theme: theme,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildPillOption(
+                      title: 'الجزء الثالث (١—٤٠/٣)',
+                      isSelected: _selectedScope == QuizScope.part3,
+                      onTap: () => setState(() => _selectedScope = QuizScope.part3),
+                      theme: theme,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildPillOption(
-                  title: 'الجزء الثاني (١—٤٠/٢)',
-                  isSelected: _selectedScope == QuizScope.part2,
-                  onTap: () => setState(() => _selectedScope = QuizScope.part2),
-                  theme: theme,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildPillOption(
-                  title: 'الجزء الأول (١—٤٠/١)',
-                  isSelected: _selectedScope == QuizScope.part1,
-                  onTap: () => setState(() => _selectedScope = QuizScope.part1),
-                  theme: theme,
-                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildPillOption(
+                      title: 'الجزء الثاني (١—٤٠/٢)',
+                      isSelected: _selectedScope == QuizScope.part2,
+                      onTap: () => setState(() => _selectedScope = QuizScope.part2),
+                      theme: theme,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildPillOption(
+                      title: 'الجزء الأول (١—٤٠/١)',
+                      isSelected: _selectedScope == QuizScope.part1,
+                      onTap: () => setState(() => _selectedScope = QuizScope.part1),
+                      theme: theme,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
